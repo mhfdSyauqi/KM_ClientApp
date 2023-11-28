@@ -1,4 +1,5 @@
 ﻿using FluentValidation;
+using KM_ClientApp.Commons.Entity;
 using KM_ClientApp.Commons.Mediator;
 using KM_ClientApp.Commons.Shared;
 using KM_ClientApp.Models.Request;
@@ -19,7 +20,7 @@ public class PatchSessionCommandHandler : ICommandHandler<PatchSessionCommand>
     public async Task<Result> Handle(PatchSessionCommand request, CancellationToken cancellationToken)
     {
         var validator = new PatchSessionCommandValidator();
-        var validationResult = validator.Validate(request);
+        var validationResult = await validator.ValidateAsync(request, cancellationToken);
 
         if (!validationResult.IsValid)
         {
@@ -30,9 +31,9 @@ public class PatchSessionCommandHandler : ICommandHandler<PatchSessionCommand>
 
         var result = await _sessionRepository.PatchActiveSessionAsync(request.patchSession, cancellationToken);
 
-        if (result == 0)
+        if (result < 0)
         {
-            return SessionErrors.BadRequest;
+            return SessionErrors.NotFound;
         }
 
         return Result.Success();
@@ -45,21 +46,7 @@ public class PatchSessionCommandValidator : AbstractValidator<PatchSessionComman
     {
         RuleFor(key => key.patchSession).NotNull();
         RuleFor(key => key.patchSession.New_Records).NotEmpty().WithMessage("Please Prove Correct Records");
-        RuleFor(key => key.patchSession.Id).Must(BeValidGuid).WithMessage("Id Is Incorect");
-        RuleFor(key => key.patchSession.User_Name).Must(BeValidUserName).WithMessage("Unauthorize user");
-    }
-
-    private bool BeValidGuid(string id)
-    {
-        return Guid.TryParse(id, out var guid);
-    }
-    private bool BeValidUserName(string userName)
-    {
-        if (userName != null && userName != "NotAuthUser")
-        {
-            return true;
-        }
-
-        return false;
+        RuleFor(key => key.patchSession.Id).BeValidGuid();
+        RuleFor(key => key.patchSession.User_Name).BeValidUserName();
     }
 }

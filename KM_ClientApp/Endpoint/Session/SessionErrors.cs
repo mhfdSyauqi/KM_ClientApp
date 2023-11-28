@@ -8,7 +8,7 @@ public static class SessionErrors
         "Session.NotFound",
         "There is no user session in database");
 
-    public static readonly Error BadRequest = new(
+    public static readonly Error NotAuthorized = new(
         "Session.BadRequest",
         "This user is not authorize!");
 

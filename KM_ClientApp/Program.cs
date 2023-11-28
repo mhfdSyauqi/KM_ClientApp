@@ -1,3 +1,4 @@
+using FluentValidation;
 using KM_ClientApp.Commons.Connection;
 using KM_ClientApp.Commons.Policy;
 using KM_ClientApp.Endpoint.Config;
@@ -36,8 +37,10 @@ builder.Services.AddAuthorization(options =>
 
 builder.Services.AddRazorPages();
 
+var assembly = typeof(Program).Assembly;
 
-builder.Services.AddMediatR(config => config.RegisterServicesFromAssembly(typeof(Program).Assembly));
+builder.Services.AddMediatR(config => config.RegisterServicesFromAssembly(assembly));
+builder.Services.AddValidatorsFromAssembly(assembly);
 
 builder.Services.AddScoped<ISQLConnectionFactory, SQLServerConnection>();
 builder.Services.AddScoped<IConfigRepository, ConfigRepository>();

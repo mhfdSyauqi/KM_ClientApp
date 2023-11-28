@@ -19,7 +19,7 @@ public class AddSessionCommandHandler : ICommandHandler<AddSessionCommand, Creat
     {
         if (request.userName == "NotAuthUser")
         {
-            return SessionErrors.BadRequest;
+            return SessionErrors.NotAuthorized;
         }
 
         var newSession = await _sessionRepository.AddEmptySessionAsync(request.userName, cancellationToken);

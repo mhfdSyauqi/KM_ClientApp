@@ -48,7 +48,18 @@ public class SessionController : MyAPIController
         var response = await Sender.Send(command, cancellationToken);
 
         return response.IsSuccess ? NoContent() : BadRequest(response.Error);
+    }
 
+    [HttpDelete]
+    public async Task<IActionResult> EndSession([FromBody] EndSessionRequest request, CancellationToken cancellationToken)
+    {
+        string computerName = User.Identity?.Name ?? "Error\\NotAuthUser";
+        request.User_Name = computerName.Split("\\")[1];
+
+        var command = new EndSessionCommand(request);
+        var response = await Sender.Send(command, cancellationToken);
+
+        return response.IsSuccess ? NoContent() : BadRequest(response.Error);
     }
 
 }
