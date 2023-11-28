@@ -17,6 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Endpoint\Startup\" />
     <Folder Include="Middleware\" />
     <Folder Include="wwwroot\src\" />
   </ItemGroup>

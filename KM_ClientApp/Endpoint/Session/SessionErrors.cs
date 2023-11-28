@@ -16,6 +16,10 @@ public static class SessionErrors
         "Session.Exist",
         "Failed to add new session, becase session already exist in database");
 
+    public static readonly Error Invalid = new(
+        "Session.Invalid",
+        "Current session is invalid, please provide correct ID");
+
     public static Error ValidationError(string? error)
     {
         return new("Session.ValidationError", error);

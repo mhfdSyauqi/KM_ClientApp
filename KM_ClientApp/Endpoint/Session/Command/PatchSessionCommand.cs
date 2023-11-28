@@ -33,7 +33,7 @@ public class PatchSessionCommandHandler : ICommandHandler<PatchSessionCommand>
 
         if (result < 0)
         {
-            return SessionErrors.NotFound;
+            return SessionErrors.Invalid;
         }
 
         return Result.Success();
