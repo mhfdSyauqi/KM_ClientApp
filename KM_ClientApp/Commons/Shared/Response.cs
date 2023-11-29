@@ -15,5 +15,7 @@ public class Data
 {
     public ConfigurationResponse? Configurations { get; set; }
     public GetSessionResponse? Session { get; set; }
+    public List<BotMessageResponse>? Messages { get; set; }
+
 }
 

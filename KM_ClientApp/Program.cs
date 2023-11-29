@@ -2,6 +2,7 @@ using FluentValidation;
 using KM_ClientApp.Commons.Connection;
 using KM_ClientApp.Commons.Policy;
 using KM_ClientApp.Endpoint.Config;
+using KM_ClientApp.Endpoint.Message;
 using KM_ClientApp.Endpoint.Session;
 using Microsoft.AspNetCore.Authentication.Negotiate;
 using Serilog;
@@ -45,6 +46,7 @@ builder.Services.AddValidatorsFromAssembly(assembly);
 builder.Services.AddScoped<ISQLConnectionFactory, SQLServerConnection>();
 builder.Services.AddScoped<IConfigRepository, ConfigRepository>();
 builder.Services.AddScoped<ISessionRepository, SessionRepository>();
+builder.Services.AddScoped<IMessageRepository, MessageRepository>();
 
 
 var app = builder.Build();
