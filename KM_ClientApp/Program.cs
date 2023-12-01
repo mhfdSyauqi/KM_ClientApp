@@ -1,6 +1,7 @@
 using FluentValidation;
 using KM_ClientApp.Commons.Connection;
 using KM_ClientApp.Commons.Policy;
+using KM_ClientApp.Endpoint.Category;
 using KM_ClientApp.Endpoint.Config;
 using KM_ClientApp.Endpoint.Message;
 using KM_ClientApp.Endpoint.Session;
@@ -10,20 +11,17 @@ using Serilog;
 var builder = WebApplication.CreateBuilder(args);
 
 // Logger
-var logger = new LoggerConfiguration()
+builder.Host.UseSerilog();
+Log.Logger = new LoggerConfiguration()
     .ReadFrom.Configuration(builder.Configuration)
     .Enrich.FromLogContext()
     .CreateLogger();
-
-builder.Logging.ClearProviders();
-builder.Logging.AddSerilog(logger);
 
 // Add services to the container.
 builder.Services
     .AddControllersWithViews()
     .AddJsonOptions(opt =>
     {
-        opt.JsonSerializerOptions.DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull;
         opt.JsonSerializerOptions.PropertyNamingPolicy = new JsonLowerCaseKeyPolicy();
     });
 
@@ -47,6 +45,7 @@ builder.Services.AddScoped<ISQLConnectionFactory, SQLServerConnection>();
 builder.Services.AddScoped<IConfigRepository, ConfigRepository>();
 builder.Services.AddScoped<ISessionRepository, SessionRepository>();
 builder.Services.AddScoped<IMessageRepository, MessageRepository>();
+builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 
 
 var app = builder.Build();
@@ -56,15 +55,17 @@ if (!app.Environment.IsDevelopment())
 {
     //Use Middleware For Released App
 
-
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
+
+app.UseSerilogRequestLogging();
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
+app.UseExceptionHandler("/error");
 
 app.UseAuthentication();
 app.UseAuthorization();

@@ -1,4 +1,5 @@
 ﻿using KM_ClientApp.Models.Response;
+using System.Text.Json.Serialization;
 
 namespace KM_ClientApp.Commons.Shared;
 
@@ -8,14 +9,22 @@ public class Response
     {
         Data = newData;
     }
+
     public Data Data { get; }
 }
 
 public class Data
 {
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public ConfigurationResponse? Configurations { get; set; }
+
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public GetSessionResponse? Session { get; set; }
+
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public List<BotMessageResponse>? Messages { get; set; }
 
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public GetCategoriesResponse? Categories { get; set; }
 }
 
