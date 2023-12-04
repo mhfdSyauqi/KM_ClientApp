@@ -16,6 +16,6 @@ public class ConfigController : MyAPIController
         var command = new GetConfigurationCommand();
         var response = await Sender.Send(command, cancellationToken);
 
-        return response.IsSuccess ? Ok(response.MapResponse()) : NotFound(response.Error);
+        return response.IsSuccess ? Ok(response.CreateResponseObject()) : NotFound(response.Error);
     }
 }

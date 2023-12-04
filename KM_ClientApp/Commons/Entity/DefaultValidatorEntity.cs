@@ -17,6 +17,19 @@ public static class DefaultValidatorEntity
                 .WithMessage("Identity is not vaild");
     }
 
+    public static IRuleBuilderOptions<T, string?> BeValidGuidOptional<T>(this IRuleBuilder<T, string?> ruleBuilder)
+    {
+        return ruleBuilder
+                .NotNull()
+                .NotEmpty()
+                .Must(prop =>
+                {
+                    bool isValidGuid = Guid.TryParse(prop, out Guid result);
+                    return isValidGuid;
+                })
+                .WithMessage("Identity is not vaild");
+    }
+
     public static IRuleBuilderOptions<T, string> BeValidUserName<T>(this IRuleBuilder<T, string> ruleBuilder)
     {
         return ruleBuilder

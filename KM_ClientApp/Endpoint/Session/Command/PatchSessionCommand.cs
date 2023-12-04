@@ -11,21 +11,20 @@ public record PatchSessionCommand(PatchSessionRequest patchSession) : ICommand;
 public class PatchSessionCommandHandler : ICommandHandler<PatchSessionCommand>
 {
     private readonly ISessionRepository _sessionRepository;
+    private readonly IValidator<PatchSessionCommand> _validator;
 
-    public PatchSessionCommandHandler(ISessionRepository sessionRepository)
+    public PatchSessionCommandHandler(ISessionRepository sessionRepository, IValidator<PatchSessionCommand> validator)
     {
         _sessionRepository = sessionRepository;
+        _validator = validator;
     }
 
     public async Task<Result> Handle(PatchSessionCommand request, CancellationToken cancellationToken)
     {
-        var validator = new PatchSessionCommandValidator();
-        var validationResult = await validator.ValidateAsync(request, cancellationToken);
-
-        if (!validationResult.IsValid)
+        var validator = await _validator.ValidateAsync(request, cancellationToken);
+        if (!validator.IsValid)
         {
-            string errorMsg = validationResult.Errors.First().ErrorMessage;
-
+            string errorMsg = validator.Errors.First().ErrorMessage;
             return SessionErrors.ValidationError(errorMsg);
         }
 

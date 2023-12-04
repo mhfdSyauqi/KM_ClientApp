@@ -12,20 +12,20 @@ public record EndSessionCommand(EndSessionRequest EndSession) : ICommand;
 public class EndSessionCommandHandler : ICommandHandler<EndSessionCommand>
 {
     private readonly ISessionRepository _sessionRepository;
+    private readonly IValidator<EndSessionCommand> _validator;
 
-    public EndSessionCommandHandler(ISessionRepository sessionRepository)
+    public EndSessionCommandHandler(ISessionRepository sessionRepository, IValidator<EndSessionCommand> validator)
     {
         _sessionRepository = sessionRepository;
+        _validator = validator;
     }
 
     public async Task<Result> Handle(EndSessionCommand request, CancellationToken cancellationToken)
     {
-        var validator = new EndSessionValidator();
-        var validationResult = await validator.ValidateAsync(request, cancellationToken);
-
-        if (!validationResult.IsValid)
+        var validator = await _validator.ValidateAsync(request, cancellationToken);
+        if (!validator.IsValid)
         {
-            string errorMsg = validationResult.Errors.First().ErrorMessage;
+            string errorMsg = validator.Errors.First().ErrorMessage;
             return SessionErrors.ValidationError(errorMsg);
         }
 
@@ -44,8 +44,8 @@ public class EndSessionValidator : AbstractValidator<EndSessionCommand>
 {
     public EndSessionValidator()
     {
-        RuleFor(x => x.EndSession).NotNull();
-        RuleFor(x => x.EndSession.Id).BeValidGuid();
-        RuleFor(x => x.EndSession.User_Name).BeValidUserName();
+        RuleFor(key => key.EndSession).NotNull();
+        RuleFor(key => key.EndSession.Id).BeValidGuid();
+        RuleFor(key => key.EndSession.User_Name).BeValidUserName();
     }
 }

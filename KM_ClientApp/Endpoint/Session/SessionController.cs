@@ -22,7 +22,7 @@ public class SessionController : MyAPIController
         var query = new GetSessionQuery(userName);
         var response = await Sender.Send(query, cancellationToken);
 
-        return response.IsSuccess ? Ok(response.MapResponse()) : NotFound(response.Error);
+        return response.IsSuccess ? Ok(response.CreateResponseObject()) : NotFound(response.Error);
     }
 
     [HttpPost]

@@ -12,17 +12,18 @@ public record GetCategoriesQuery(GetCategoriesRequest CategoriesRequest) : IQuer
 public class GetCategoriesQueryHandler : IQueryHandler<GetCategoriesQuery, GetCategoriesResponse>
 {
     private readonly ICategoryRepository _categoryRepository;
-    public GetCategoriesQueryHandler(ICategoryRepository categoryRepository)
+    private readonly IValidator<GetCategoriesQuery> _validator;
+    public GetCategoriesQueryHandler(ICategoryRepository categoryRepository, IValidator<GetCategoriesQuery> validator)
     {
         _categoryRepository = categoryRepository;
+        _validator = validator;
     }
 
     public async Task<Result<GetCategoriesResponse>> Handle(GetCategoriesQuery request, CancellationToken cancellationToken)
     {
-        var validator = new GetCategoriesQueryValidator();
-        var validationResult = validator.Validate(request);
+        var validator = await _validator.ValidateAsync(request, cancellationToken);
 
-        if (!validationResult.IsValid)
+        if (!validator.IsValid)
         {
             return Result.Failure<GetCategoriesResponse>(new(
                     "Category.BadRequest",

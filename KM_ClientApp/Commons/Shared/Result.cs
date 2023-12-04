@@ -35,7 +35,7 @@ public class Result<T> : Result
 
     protected internal Result(bool isSuccess, Error error, T? value) : base(isSuccess, error)
     {
-        if (isSuccess && error != Error.None && value == null || !isSuccess && error == Error.None && value != null)
+        if (isSuccess && value == null || !isSuccess && value != null)
         {
             throw new ArgumentException("Invalid Type Of Error", nameof(error));
         }
@@ -43,21 +43,18 @@ public class Result<T> : Result
         Value = value;
     }
 
-    public Response MapResponse()
+    public Response CreateResponseObject()
     {
-        var data = new Data();
+        Data dataObj = new();
 
         if (Value != null)
         {
             var sourcePropertiesType = Value.GetType().Name;
-
-            List<PropertyInfo> destinationProperties = data.GetType().GetProperties().ToList();
-
+            List<PropertyInfo> destinationProperties = dataObj.GetType().GetProperties().ToList();
             PropertyInfo? destinationProperty = destinationProperties.Find(prop => prop.PropertyType.Name == sourcePropertiesType);
 
-            destinationProperty?.SetValue(data, Value, null);
+            destinationProperty?.SetValue(dataObj, Value, null);
         }
-
-        return new Response(data);
+        return new Response(dataObj);
     }
 }

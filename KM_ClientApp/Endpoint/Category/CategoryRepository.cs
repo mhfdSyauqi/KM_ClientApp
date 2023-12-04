@@ -35,9 +35,49 @@ public class CategoryRepository : ICategoryRepository
 
         return result;
     }
+
+    public async Task<IEnumerable<Categories>> GetSuggestionCategoryAsync(SuggestionCategoriesRequest request, CancellationToken cancellationToken)
+    {
+        using var connection = await _connection.CreateConnectionAsync();
+
+        string storedProcedureName = "[dbo].[Search_Categories_By_Keyword]";
+
+        var command = new CommandDefinition(
+            storedProcedureName,
+            request,
+            commandType: System.Data.CommandType.StoredProcedure,
+            cancellationToken: cancellationToken
+        );
+
+        var result = await connection.QueryAsync<Categories>(command);
+
+        return result;
+    }
+
+    public async Task<IEnumerable<Categories>> SearchCategoryByKeywordAsync(SearchCategoriesRequest request, CancellationToken cancellationToken)
+    {
+        using var connection = await _connection.CreateConnectionAsync();
+
+        string storedProcedureName = "[dbo].[Search_Categories_By_Keyword]";
+
+        var command = new CommandDefinition(
+            storedProcedureName,
+            request,
+            commandType: System.Data.CommandType.StoredProcedure,
+            cancellationToken: cancellationToken
+        );
+
+        var result = await connection.QueryAsync<Categories>(command);
+
+        return result;
+    }
 }
 
 public interface ICategoryRepository
 {
     Task<IEnumerable<Categories>> GetCategoryByIdentityAsync(GetCategoriesRequest request, CancellationToken cancellationToken);
+
+    Task<IEnumerable<Categories>> SearchCategoryByKeywordAsync(SearchCategoriesRequest request, CancellationToken cancellationToken);
+
+    Task<IEnumerable<Categories>> GetSuggestionCategoryAsync(SuggestionCategoriesRequest request, CancellationToken cancellationToken);
 }
