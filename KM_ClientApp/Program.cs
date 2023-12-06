@@ -5,6 +5,7 @@ using KM_ClientApp.Endpoint.Category;
 using KM_ClientApp.Endpoint.Config;
 using KM_ClientApp.Endpoint.Message;
 using KM_ClientApp.Endpoint.Session;
+using KM_ClientApp.Middleware;
 using Microsoft.AspNetCore.Authentication.Negotiate;
 using Serilog;
 
@@ -48,6 +49,8 @@ builder.Services.AddScoped<IMessageRepository, MessageRepository>();
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 
 
+builder.Services.AddTransient<ErrorExceptionMiddleware>();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -65,7 +68,7 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
-app.UseExceptionHandler("/error");
+app.UseMiddleware<ErrorExceptionMiddleware>();
 
 app.UseAuthentication();
 app.UseAuthorization();

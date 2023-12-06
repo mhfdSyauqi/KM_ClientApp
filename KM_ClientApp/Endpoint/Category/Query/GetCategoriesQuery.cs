@@ -21,15 +21,7 @@ public class GetCategoriesQueryHandler : IQueryHandler<GetCategoriesQuery, GetCa
 
     public async Task<Result<GetCategoriesResponse>> Handle(GetCategoriesQuery request, CancellationToken cancellationToken)
     {
-        var validator = await _validator.ValidateAsync(request, cancellationToken);
-
-        if (!validator.IsValid)
-        {
-            return Result.Failure<GetCategoriesResponse>(new(
-                    "Category.BadRequest",
-                    "Invalid id type, please check ur input"
-                    ));
-        }
+        await _validator.ValidateAndThrowAsync(request, cancellationToken);
 
         var categories = await _categoryRepository.GetCategoryByIdentityAsync(request.CategoriesRequest, cancellationToken);
 
@@ -66,7 +58,5 @@ public class GetCategoriesQueryValidator : AbstractValidator<GetCategoriesQuery>
         {
             RuleFor(key => key.CategoriesRequest.Searched_Identity).BeValidGuidOptional();
         });
-
     }
-
 }

@@ -1,4 +1,6 @@
-﻿using KM_ClientApp.Commons.Mediator;
+﻿using FluentValidation;
+using KM_ClientApp.Commons.Entity;
+using KM_ClientApp.Commons.Mediator;
 using KM_ClientApp.Commons.Shared;
 using KM_ClientApp.Models.Response;
 
@@ -9,18 +11,17 @@ public record AddSessionCommand(string userName) : ICommand<CreatedSessionRespon
 public class AddSessionCommandHandler : ICommandHandler<AddSessionCommand, CreatedSessionResponse>
 {
     private readonly ISessionRepository _sessionRepository;
+    private readonly IValidator<AddSessionCommand> _validator;
 
-    public AddSessionCommandHandler(ISessionRepository sessionRepository)
+    public AddSessionCommandHandler(ISessionRepository sessionRepository, IValidator<AddSessionCommand> validator)
     {
         _sessionRepository = sessionRepository;
+        _validator = validator;
     }
 
     public async Task<Result<CreatedSessionResponse>> Handle(AddSessionCommand request, CancellationToken cancellationToken)
     {
-        if (request.userName == "NotAuthUser")
-        {
-            return SessionErrors.NotAuthorized;
-        }
+        await _validator.ValidateAndThrowAsync(request, cancellationToken);
 
         var newSession = await _sessionRepository.AddEmptySessionAsync(request.userName, cancellationToken);
 
@@ -35,5 +36,13 @@ public class AddSessionCommandHandler : ICommandHandler<AddSessionCommand, Creat
         };
 
         return Result.Success(response);
+    }
+
+    public class AddSessionCommandValidator : AbstractValidator<AddSessionCommand>
+    {
+        public AddSessionCommandValidator()
+        {
+            RuleFor(key => key.userName).BeValidUserName();
+        }
     }
 }

@@ -21,15 +21,7 @@ public class SearchCategoriesQueryHandler : IQueryHandler<SearchCategoriesQuery,
 
     public async Task<Result<SearchCategoriesResponse>> Handle(SearchCategoriesQuery request, CancellationToken cancellationToken)
     {
-        var validator = await _validator.ValidateAsync(request, cancellationToken);
-
-        if (!validator.IsValid)
-        {
-            return Result.Failure<SearchCategoriesResponse>(new(
-                "Category.BadRequest",
-                $"{validator.Errors.First().ErrorMessage}"
-                ));
-        }
+        await _validator.ValidateAndThrowAsync(request, cancellationToken);
 
         var searched = await _categoryRepository.SearchCategoryByKeywordAsync(request.Request, cancellationToken);
 

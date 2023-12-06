@@ -21,15 +21,7 @@ public class HeatCategoriesCommandHandler : ICommandHandler<HeatCategoriesComman
 
     public async Task<Result> Handle(HeatCategoriesCommand request, CancellationToken cancellationToken)
     {
-        var validator = await _validator.ValidateAsync(request, cancellationToken);
-
-        if (!validator.IsValid)
-        {
-            return Result.Failure(new(
-                "Category.BadRequest",
-                $"{validator.Errors.First().ErrorMessage}"
-                ));
-        }
+        await _validator.ValidateAndThrowAsync(request, cancellationToken);
 
         await _categoryRepository.AddHeatCategoryAsync(request.Request, cancellationToken);
 

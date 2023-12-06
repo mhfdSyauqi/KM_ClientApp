@@ -159,8 +159,8 @@ public class MessageController : MyAPIController
     }
 
     [HttpGet]
-    [Route("sugestion")]
-    public async Task<IActionResult> GetSugetionMsg([FromBody] BotMessageRequest messageRequest, CancellationToken cancellationToken)
+    [Route("suggestion")]
+    public async Task<IActionResult> GetSuggetionMsg([FromBody] BotMessageRequest messageRequest, CancellationToken cancellationToken)
     {
         string computerName = User.Identity?.Name ?? "Error\\NotAuthUser";
         messageRequest.User_Name = computerName.Split("\\")[1];

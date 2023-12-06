@@ -21,12 +21,7 @@ public class PatchSessionCommandHandler : ICommandHandler<PatchSessionCommand>
 
     public async Task<Result> Handle(PatchSessionCommand request, CancellationToken cancellationToken)
     {
-        var validator = await _validator.ValidateAsync(request, cancellationToken);
-        if (!validator.IsValid)
-        {
-            string errorMsg = validator.Errors.First().ErrorMessage;
-            return SessionErrors.ValidationError(errorMsg);
-        }
+        await _validator.ValidateAndThrowAsync(request, cancellationToken);
 
         var result = await _sessionRepository.PatchActiveSessionAsync(request.patchSession, cancellationToken);
 
