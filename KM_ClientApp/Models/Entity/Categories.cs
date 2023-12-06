@@ -6,6 +6,7 @@ public class Categories
     public string Name { get; set; } = string.Empty;
     public Guid? Uid_Reference { get; set; }
     public int Layer { get; set; }
+    public bool Has_Content { get; set; }
     public int Current { get; set; }
     public int? Next { get; set; }
     public int? Previous { get; set; }

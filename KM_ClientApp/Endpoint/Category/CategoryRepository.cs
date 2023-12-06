@@ -14,6 +14,32 @@ public class CategoryRepository : ICategoryRepository
         _connection = connection;
     }
 
+    public async Task<int> AddHeatCategoryAsync(HeatCategoriesRequest request, CancellationToken cancellationToken)
+    {
+        using var connection = await _connection.CreateConnectionAsync();
+
+        string storedProcedureName = "[dbo].[Add_Categories_Heat]";
+
+        var parameter = new HeatCategories()
+        {
+            Session_Id = Guid.Parse(request.Session_Id),
+            User_Name = request.User_Name,
+            Heat_Name = request.Heat_Name,
+            Heat_Id = string.IsNullOrEmpty(request.Heat_Id) ? Guid.Empty : Guid.Parse(request.Heat_Id)
+        };
+
+        var command = new CommandDefinition(
+            storedProcedureName,
+            parameter,
+            commandType: System.Data.CommandType.StoredProcedure,
+            cancellationToken: cancellationToken
+        );
+
+        var result = await connection.ExecuteAsync(command);
+
+        return result;
+    }
+
     public async Task<IEnumerable<Categories>> GetCategoryByIdentityAsync(GetCategoriesRequest request, CancellationToken cancellationToken)
     {
         using var connection = await _connection.CreateConnectionAsync();
@@ -80,4 +106,6 @@ public interface ICategoryRepository
     Task<IEnumerable<Categories>> SearchCategoryByKeywordAsync(SearchCategoriesRequest request, CancellationToken cancellationToken);
 
     Task<IEnumerable<Categories>> GetSuggestionCategoryAsync(SuggestionCategoriesRequest request, CancellationToken cancellationToken);
+
+    Task<int> AddHeatCategoryAsync(HeatCategoriesRequest request, CancellationToken cancellationToken);
 }

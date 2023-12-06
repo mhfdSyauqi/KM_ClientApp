@@ -22,7 +22,7 @@ public class SuggestionCategoriesQueryHandler : IQueryHandler<SuggestionCategori
 
         var response = suggestion.Select(row => new SuggestionCategoriesResponse()
         {
-            Items = suggestion.Select(item => new ItemCategoryResponse() { Id = item.Uid.ToString("N"), Name = item.Name }).ToList(),
+            Items = suggestion.Select(item => new ItemCategoryResponse() { Id = item.Uid.ToString("N"), Name = item.Name, Has_Content = item.Has_Content }).ToList(),
             Paginations = new()
             {
                 Current = row.Current,

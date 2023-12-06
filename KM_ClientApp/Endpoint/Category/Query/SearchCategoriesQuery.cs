@@ -36,7 +36,7 @@ public class SearchCategoriesQueryHandler : IQueryHandler<SearchCategoriesQuery,
         var response = searched.Select(row => new SearchCategoriesResponse()
         {
             Searched_Keyword = request.Request.Searched_Keyword,
-            Items = searched.Select(item => new ItemCategoryResponse { Id = item.Uid.ToString("N"), Name = item.Name }).ToList(),
+            Items = searched.Select(item => new ItemCategoryResponse { Id = item.Uid.ToString("N"), Name = item.Name, Has_Content = item.Has_Content }).ToList(),
             Paginations = new()
             {
                 Current = row.Current,

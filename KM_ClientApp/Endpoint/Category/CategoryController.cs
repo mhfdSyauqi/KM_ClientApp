@@ -1,4 +1,5 @@
 ﻿using KM_ClientApp.Controllers;
+using KM_ClientApp.Endpoint.Category.Command;
 using KM_ClientApp.Endpoint.Category.Query;
 using KM_ClientApp.Models.Request;
 using MediatR;
@@ -40,5 +41,18 @@ public class CategoryController : MyAPIController
         var result = await Sender.Send(query, cancellationToken);
 
         return result.IsSuccess ? Ok(result.CreateResponseObject()) : NotFound(result.Error);
+    }
+
+    [HttpPost]
+    [Route("heat")]
+    public async Task<IActionResult> AddHeatCategories([FromBody] HeatCategoriesRequest request, CancellationToken cancellationToken)
+    {
+        string computerName = User.Identity?.Name ?? "Error\\NotAuthUser";
+        request.User_Name = computerName.Split("\\")[1];
+
+        var command = new HeatCategoriesCommand(request);
+        var result = await Sender.Send(command, cancellationToken);
+
+        return result.IsSuccess ? NoContent() : BadRequest(result.Error);
     }
 }

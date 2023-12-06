@@ -37,7 +37,7 @@ public class GetCategoriesQueryHandler : IQueryHandler<GetCategoriesQuery, GetCa
         {
             Searched_Identity = row.Uid_Reference?.ToString("N"),
             Layer = row.Layer,
-            Items = categories.Select(item => new ItemCategoryResponse { Id = item.Uid.ToString("N"), Name = item.Name }).ToList(),
+            Items = categories.Select(item => new ItemCategoryResponse { Id = item.Uid.ToString("N"), Name = item.Name, Has_Content = item.Has_Content }).ToList(),
             Paginations = new()
             {
                 Current = row.Current,
@@ -62,7 +62,11 @@ public class GetCategoriesQueryValidator : AbstractValidator<GetCategoriesQuery>
 {
     public GetCategoriesQueryValidator()
     {
-        RuleFor(key => key.CategoriesRequest.Searched_Identity ?? "").BeValidGuid();
+        When(props => !string.IsNullOrWhiteSpace(props.CategoriesRequest.Searched_Identity), () =>
+        {
+            RuleFor(key => key.CategoriesRequest.Searched_Identity).BeValidGuidOptional();
+        });
+
     }
 
 }
