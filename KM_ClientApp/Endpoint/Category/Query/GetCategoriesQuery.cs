@@ -40,10 +40,7 @@ public class GetCategoriesQueryHandler : IQueryHandler<GetCategoriesQuery, GetCa
 
         if (categories == null || response == null)
         {
-            return Result.Failure<GetCategoriesResponse>(new(
-                "Category.NotFound",
-                "There is no category found in database, please check your input"
-                ));
+            return CategoryErrors.NotFound;
         }
 
         return Result.Success(response);

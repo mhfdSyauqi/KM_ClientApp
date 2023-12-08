@@ -39,14 +39,9 @@ public class SearchCategoriesQueryHandler : IQueryHandler<SearchCategoriesQuery,
 
         if (searched == null || response == null)
         {
-            return Result.Failure<SearchCategoriesResponse>(new(
-                "Category.NotFound",
-                "There is no category found in database, please check your input"
-                ));
+            return CategoryErrors.NotFound;
         }
-
         return Result.Success(response);
-
     }
 }
 

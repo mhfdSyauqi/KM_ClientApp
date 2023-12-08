@@ -33,12 +33,8 @@ public class SuggestionCategoriesQueryHandler : IQueryHandler<SuggestionCategori
 
         if (suggestion == null || response == null)
         {
-            return Result.Failure<SuggestionCategoriesResponse>(new(
-                "Category.NotFound",
-                "There is no category found in database, please check your input"
-                ));
+            return CategoryErrors.NotFound;
         }
-
         return Result.Success(response);
     }
 }
