@@ -4,9 +4,9 @@ using KM_ClientApp.Models.Response;
 
 namespace KM_ClientApp.Endpoint.Config;
 
-public record GetConfigurationCommand : IQuery<ConfigurationResponse>;
+public record GetConfigurationQuery : IQuery<ConfigurationResponse>;
 
-public class GetConfigurationHandler : IQueryHandler<GetConfigurationCommand, ConfigurationResponse>
+public class GetConfigurationHandler : IQueryHandler<GetConfigurationQuery, ConfigurationResponse>
 {
     private readonly IConfigRepository _configRepository;
 
@@ -15,7 +15,7 @@ public class GetConfigurationHandler : IQueryHandler<GetConfigurationCommand, Co
         _configRepository = configRepository;
     }
 
-    public async Task<Result<ConfigurationResponse>> Handle(GetConfigurationCommand request, CancellationToken cancellationToken)
+    public async Task<Result<ConfigurationResponse>> Handle(GetConfigurationQuery request, CancellationToken cancellationToken)
     {
         var config = await _configRepository.GetAppConfigurationAsync(cancellationToken);
 

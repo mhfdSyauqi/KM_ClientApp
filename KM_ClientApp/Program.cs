@@ -3,6 +3,7 @@ using KM_ClientApp.Commons.Connection;
 using KM_ClientApp.Commons.Policy;
 using KM_ClientApp.Endpoint.Category;
 using KM_ClientApp.Endpoint.Config;
+using KM_ClientApp.Endpoint.Content;
 using KM_ClientApp.Endpoint.Message;
 using KM_ClientApp.Endpoint.Session;
 using KM_ClientApp.Middleware;
@@ -47,6 +48,7 @@ builder.Services.AddScoped<IConfigRepository, ConfigRepository>();
 builder.Services.AddScoped<ISessionRepository, SessionRepository>();
 builder.Services.AddScoped<IMessageRepository, MessageRepository>();
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
+builder.Services.AddScoped<IContentRepository, ContentRepository>();
 
 
 builder.Services.AddTransient<ErrorExceptionMiddleware>();

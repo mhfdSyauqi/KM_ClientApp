@@ -13,7 +13,7 @@ public class ConfigController : MyAPIController
     [HttpGet]
     public async Task<IActionResult> GetInitialConfiguration(CancellationToken cancellationToken)
     {
-        var command = new GetConfigurationCommand();
+        var command = new GetConfigurationQuery();
         var response = await Sender.Send(command, cancellationToken);
 
         return response.IsSuccess ? Ok(response.CreateResponseObject()) : NotFound(response.Error);
