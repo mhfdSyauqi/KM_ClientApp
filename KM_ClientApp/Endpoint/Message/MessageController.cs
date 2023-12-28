@@ -12,7 +12,7 @@ public class MessageController : MyAPIController
     {
     }
 
-    [HttpGet]
+    [HttpPost]
     [Route("closing")]
     public async Task<IActionResult> GetClosingMsg([FromBody] BotMessageRequest messageRequest, CancellationToken cancellationToken)
     {
@@ -28,7 +28,7 @@ public class MessageController : MyAPIController
         return response.IsSuccess ? Ok(response.CreateResponseObject()) : NotFound(response.Error);
     }
 
-    [HttpGet]
+    [HttpPost]
     [Route("feedback")]
     public async Task<IActionResult> GetFeedbackMsg([FromBody] BotMessageRequest messageRequest, CancellationToken cancellationToken)
     {
@@ -44,7 +44,7 @@ public class MessageController : MyAPIController
         return response.IsSuccess ? Ok(response.CreateResponseObject()) : NotFound(response.Error);
     }
 
-    [HttpGet]
+    [HttpPost]
     [Route("idle")]
     public async Task<IActionResult> GetIdleMsg([FromBody] BotMessageRequest messageRequest, CancellationToken cancellationToken)
     {
@@ -60,7 +60,7 @@ public class MessageController : MyAPIController
         return response.IsSuccess ? Ok(response.CreateResponseObject()) : NotFound(response.Error);
     }
 
-    [HttpGet]
+    [HttpPost]
     [Route("layers/{layer}")]
     public async Task<IActionResult> GetLayersMsg(int layer, [FromBody] BotMessageRequest messageRequest, CancellationToken cancellationToken)
     {
@@ -78,7 +78,7 @@ public class MessageController : MyAPIController
         return response.IsSuccess ? Ok(response.CreateResponseObject()) : NotFound(response.Error);
     }
 
-    [HttpGet]
+    [HttpPost]
     [Route("sended_mail")]
     public async Task<IActionResult> GetSendedMailMsg([FromBody] BotMessageRequest messageRequest, CancellationToken cancellationToken)
     {
@@ -94,7 +94,7 @@ public class MessageController : MyAPIController
         return response.IsSuccess ? Ok(response.CreateResponseObject()) : NotFound(response.Error);
     }
 
-    [HttpGet]
+    [HttpPost]
     [Route("not_found")]
     public async Task<IActionResult> GetNotFoundMsg([FromBody] BotMessageRequest messageRequest, CancellationToken cancellationToken)
     {
@@ -110,7 +110,7 @@ public class MessageController : MyAPIController
         return response.IsSuccess ? Ok(response.CreateResponseObject()) : NotFound(response.Error);
     }
 
-    [HttpGet]
+    [HttpPost]
     [Route("reasked")]
     public async Task<IActionResult> GetReaskedMsg([FromBody] BotMessageRequest messageRequest, CancellationToken cancellationToken)
     {
@@ -126,7 +126,7 @@ public class MessageController : MyAPIController
         return response.IsSuccess ? Ok(response.CreateResponseObject()) : NotFound(response.Error);
     }
 
-    [HttpGet]
+    [HttpPost]
     [Route("searched")]
     public async Task<IActionResult> GetSearchedMsg([FromBody] BotMessageRequest messageRequest, CancellationToken cancellationToken)
     {
@@ -142,7 +142,7 @@ public class MessageController : MyAPIController
         return response.IsSuccess ? Ok(response.CreateResponseObject()) : NotFound(response.Error);
     }
 
-    [HttpGet]
+    [HttpPost]
     [Route("solved")]
     public async Task<IActionResult> GetSolvedMsg([FromBody] BotMessageRequest messageRequest, CancellationToken cancellationToken)
     {
@@ -158,7 +158,7 @@ public class MessageController : MyAPIController
         return response.IsSuccess ? Ok(response.CreateResponseObject()) : NotFound(response.Error);
     }
 
-    [HttpGet]
+    [HttpPost]
     [Route("suggestion")]
     public async Task<IActionResult> GetSuggetionMsg([FromBody] BotMessageRequest messageRequest, CancellationToken cancellationToken)
     {
@@ -174,7 +174,7 @@ public class MessageController : MyAPIController
         return response.IsSuccess ? Ok(response.CreateResponseObject()) : NotFound(response.Error);
     }
 
-    [HttpGet]
+    [HttpPost]
     [Route("welcome")]
     public async Task<IActionResult> GetWelcomeMsg([FromBody] BotMessageRequest messageRequest, CancellationToken cancellationToken)
     {

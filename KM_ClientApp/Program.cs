@@ -39,7 +39,7 @@ builder.Services.AddAuthorization(options =>
 
 builder.Services.AddCors(options =>
     options.AddPolicy("local", cfg =>
-        cfg.WithOrigins("http://localhost:5173").AllowCredentials().AllowAnyHeader().AllowAnyHeader()
+        cfg.WithOrigins("http://localhost:5173").AllowCredentials().AllowAnyHeader().AllowAnyMethod()
     )
 );
 

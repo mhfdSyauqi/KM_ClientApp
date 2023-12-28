@@ -14,7 +14,7 @@ public class CategoryController : MyAPIController
     }
 
 
-    [HttpGet]
+    [HttpPost]
     public async Task<IActionResult> GetCategories([FromBody] GetCategoriesRequest request, CancellationToken cancellationToken)
     {
         var query = new GetCategoriesQuery(request);
@@ -23,7 +23,7 @@ public class CategoryController : MyAPIController
         return result.IsSuccess ? Ok(result.CreateResponseObject()) : NotFound(result.Error);
     }
 
-    [HttpGet]
+    [HttpPost]
     [Route("search")]
     public async Task<IActionResult> SearchCategories([FromBody] SearchCategoriesRequest request, CancellationToken cancellationToken)
     {
@@ -33,7 +33,7 @@ public class CategoryController : MyAPIController
         return result.IsSuccess ? Ok(result.CreateResponseObject()) : NotFound(result.Error);
     }
 
-    [HttpGet]
+    [HttpPost]
     [Route("suggest")]
     public async Task<IActionResult> SugestionCategories([FromBody] SuggestionCategoriesRequest request, CancellationToken cancellationToken)
     {

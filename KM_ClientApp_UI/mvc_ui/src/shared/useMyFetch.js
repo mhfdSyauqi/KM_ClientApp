@@ -1,12 +1,14 @@
-import { createFetch } from "@vueuse/core";
+import { createFetch } from '@vueuse/core'
 
 const useMyFetch = createFetch({
   baseUrl: 'https://localhost:44356/api',
-  combination: "overwrite",
+  combination: 'overwrite',
   fetchOptions: {
-    credentials: "include"
+    credentials: 'include',
+    headers: {
+      'Content-Type': 'application/json'
+    }
   }
 })
 
-
-export { useMyFetch };
+export { useMyFetch }
