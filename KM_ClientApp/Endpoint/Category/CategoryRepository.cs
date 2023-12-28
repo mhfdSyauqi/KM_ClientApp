@@ -25,7 +25,7 @@ public class CategoryRepository : ICategoryRepository
             Session_Id = Guid.Parse(request.Session_Id),
             User_Name = request.User_Name,
             Heat_Name = request.Heat_Name,
-            Heat_Id = string.IsNullOrEmpty(request.Heat_Id) ? Guid.Empty : Guid.Parse(request.Heat_Id)
+            Heat_Id = string.IsNullOrEmpty(request.Heat_Id) ? null : Guid.Parse(request.Heat_Id)
         };
 
         var command = new CommandDefinition(
@@ -46,13 +46,15 @@ public class CategoryRepository : ICategoryRepository
 
         string storedProcedureName = "[dbo].[Get_Categories_By_Identity]";
 
+        var param = new GetCategory()
+        {
+            searchedIdentity = string.IsNullOrEmpty(request.Searched_Identity) ? null : Guid.Parse(request.Searched_Identity),
+            currentPage = request.Current_Page
+        };
+
         var command = new CommandDefinition(
             storedProcedureName,
-            new
-            {
-                searchedIdentity = request.Searched_Identity == null ? Guid.Empty : Guid.Parse(request.Searched_Identity),
-                currentPage = request.Current_Page,
-            },
+            param,
             commandType: System.Data.CommandType.StoredProcedure,
             cancellationToken: cancellationToken
         );
