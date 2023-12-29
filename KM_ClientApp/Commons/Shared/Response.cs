@@ -35,5 +35,8 @@ public class Data
 
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public BotContentResponse? Content { get; set; }
+
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public ReferenceCategoriesResponse? Reference_Categories { get; set; }
 }
 

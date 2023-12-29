@@ -64,6 +64,24 @@ public class CategoryRepository : ICategoryRepository
         return result;
     }
 
+    public async Task<Guid?> GetReferenceCategoryAsync(ReferenceCategoriesRequest request, CancellationToken cancellationToken)
+    {
+        using var connection = await _connection.CreateConnectionAsync();
+
+        var query = @"
+               SELECT 
+	                [uid_reference]
+                FROM 
+	                [dbo].[View_Active_Categories]
+                WHERE [uid] = @Id
+        ";
+
+        var command = new CommandDefinition(query, new { Id = Guid.Parse(request.Id) }, cancellationToken: cancellationToken);
+        var result = await connection.QueryFirstOrDefaultAsync<Guid?>(command);
+
+        return result;
+    }
+
     public async Task<IEnumerable<Categories>> GetSuggestionCategoryAsync(SuggestionCategoriesRequest request, CancellationToken cancellationToken)
     {
         using var connection = await _connection.CreateConnectionAsync();
@@ -103,6 +121,8 @@ public class CategoryRepository : ICategoryRepository
 
 public interface ICategoryRepository
 {
+    Task<Guid?> GetReferenceCategoryAsync(ReferenceCategoriesRequest request, CancellationToken cancellationToken);
+
     Task<IEnumerable<Categories>> GetCategoryByIdentityAsync(GetCategoriesRequest request, CancellationToken cancellationToken);
 
     Task<IEnumerable<Categories>> SearchCategoryByKeywordAsync(SearchCategoriesRequest request, CancellationToken cancellationToken);

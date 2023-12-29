@@ -55,4 +55,14 @@ public class CategoryController : MyAPIController
 
         return result.IsSuccess ? NoContent() : BadRequest(result.Error);
     }
+
+    [HttpPost]
+    [Route("ref")]
+    public async Task<IActionResult> GetReferenceCategories([FromBody] ReferenceCategoriesRequest request, CancellationToken cancellationToken)
+    {
+        var query = new ReferenceCategoriesQuery(request);
+        var result = await Sender.Send(query, cancellationToken);
+
+        return result.IsSuccess ? Ok(result.CreateResponseObject()) : NotFound(result.Error);
+    }
 }
