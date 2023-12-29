@@ -17,8 +17,7 @@ const userMessage = props.record.message
 <template>
   <div class="flex justify-end items-end">
     <div
-      class="basis-1/5 max-w-[50%] h-full text-sm bg-amber-500 drop-shadow-lg p-3 rounded-xl rounded-br-none"
-      :class="userMessage.length > 33 ? 'grow' : null"
+      class="basis-auto min-w-[17%] max-w-[50%] h-full text-sm bg-amber-500 drop-shadow-lg p-3 rounded-xl rounded-br-none"
     >
       <p class="break-words">{{ userMessage }}</p>
 

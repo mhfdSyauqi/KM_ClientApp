@@ -30,8 +30,7 @@ const botMessageType = props.record.message.type
       />
     </div>
     <div
-      class="basis-1/5 max-w-[50%] h-full text-sm bg-white drop-shadow-lg p-3 rounded-xl rounded-bl-none"
-      :class="botMessageText?.length > 33 ? 'grow' : null"
+      class="basis-auto max-w-[50%] h-full text-sm bg-white drop-shadow-lg p-3 rounded-xl rounded-bl-none"
     >
       <p class="break-words">{{ botMessageText }}</p>
 

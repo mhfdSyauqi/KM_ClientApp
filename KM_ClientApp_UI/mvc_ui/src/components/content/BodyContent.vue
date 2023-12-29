@@ -8,56 +8,25 @@ import BotCategories from '@/shared/botCategories'
 import BotRecord from '@/shared/botRecord'
 import UserRecord from '@/shared/userRecord'
 
-import { useConfigStore } from '@/stores/config'
+import { useContentStore } from '@/stores/content'
 import { useSessionStore } from '@/stores/session'
-import { promiseTimeout, useTimeout } from '@vueuse/core'
+
 import { onMounted, onUpdated, ref } from 'vue'
 
 const sessionStore = useSessionStore()
-const configStore = useConfigStore()
+const contentStore = useContentStore()
 const scrollPosition = ref(0)
-const delayTyping = configStore.appConfig?.delay_typing ?? 500
 
 onMounted(async () => {
   await sessionStore.sessionHandler.get()
   if (sessionStore.userSession.records.length === 0) {
-    await LoadStartup()
+    await contentStore.StartUpContent()
   }
 })
 
 onUpdated(async () => {
   scrollPosition.value.scrollIntoView({ behavior: 'smooth' })
 })
-
-async function LoadStartup() {
-  const { GetMessageByTypeAsync, MessageType } = await import('@/api/message')
-  const { is_success: msg_success, messages } = await GetMessageByTypeAsync(MessageType.welcome)
-
-  if (!msg_success) {
-    // DO SOME THING ERROR POP OUT
-  }
-
-  for (let i = 0; i <= messages.length - 1; i++) {
-    const ready = useTimeout(delayTyping * i)
-    const message = messages[i]
-    sessionStore.recordHandler.addBotMessage('message', message)
-    await promiseTimeout(delayTyping)
-    if (ready.value) {
-      sessionStore.recordHandler.markAsRendered()
-    }
-  }
-
-  // const { GetCategoriesAsync } = await import('@/api/categories')
-  // const { is_success: ctg_success, categories } = await GetCategoriesAsync()
-
-  // if (!ctg_success) {
-  //   // DO SOME THING ERROR POP OUT
-  // }
-
-  // sessionStore.recordHandler.addBotMessage('category', categories)
-
-  return sessionStore.sessionHandler.update()
-}
 </script>
 
 <template>
