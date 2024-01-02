@@ -1,8 +1,11 @@
 import { useMyFetch } from '@/shared/useMyFetch'
+import { useContentStore } from '@/stores/content'
 import { acceptHMRUpdate, defineStore } from 'pinia'
 import { ref } from 'vue'
 
 export const useSessionStore = defineStore('session', () => {
+  const contentStore = useContentStore()
+
   const userSession = ref({
     id: null,
     is_active: null,
@@ -15,7 +18,8 @@ export const useSessionStore = defineStore('session', () => {
       const { data, statusCode } = await useMyFetch('session').get().json()
       if (statusCode.value === 404 && data.value === null) {
         await sessionHandler.create()
-        return await sessionHandler.get()
+        await sessionHandler.get()
+        return
       }
 
       const { id, is_active, has_feedback, records } = data.value.data.session
@@ -25,9 +29,9 @@ export const useSessionStore = defineStore('session', () => {
       userSession.value.records = JSON.parse(records)
     },
     create: async () => {
-      const { statusCode, error } = await useMyFetch('session').post()
-      if (statusCode !== 201) {
-        // TODO : Create Error Handler Method
+      const { statusCode } = await useMyFetch('session').post()
+      if (statusCode.value !== 201) {
+        return await contentStore.ShowErrorContent()
       }
     },
     update: async () => {
@@ -37,9 +41,9 @@ export const useSessionStore = defineStore('session', () => {
       }
 
       const payload = JSON.stringify(patchSessionRequest)
-      const { statusCode, error } = await useMyFetch('session').patch(payload, 'application/json')
-      if (statusCode !== 204) {
-        // TODO : Create Error Handler Method
+      const { statusCode } = await useMyFetch('session').patch(payload, 'application/json')
+      if (statusCode.value !== 204) {
+        return await contentStore.ShowErrorContent()
       }
     },
     end: async (endedBy = null) => {
@@ -49,10 +53,9 @@ export const useSessionStore = defineStore('session', () => {
       }
 
       const payload = JSON.stringify(endSessionRequest)
-      const { statusCode, error } = await useMyFetch('session').delete(payload, 'application/json')
-
-      if (statusCode !== 204) {
-        // TODO : Create Error Handler Method
+      const { statusCode } = await useMyFetch('session').delete(payload, 'application/json')
+      if (statusCode.value !== 204) {
+        return await contentStore.ShowErrorContent()
       }
     }
   }

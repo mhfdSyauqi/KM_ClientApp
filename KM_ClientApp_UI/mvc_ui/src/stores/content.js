@@ -21,6 +21,16 @@ export const useContentStore = defineStore('content', () => {
     await ResponseLayeredContent({ messageType: MessageType.welcome })
   }
 
+  async function ShowErrorContent() {
+    sessionStore.recordHandler.markSelectedCategory()
+    const ready = useTimeout(delayTyping)
+    sessionStore.recordHandler.addErrorMessage()
+    await promiseTimeout(delayTyping)
+    if (ready.value) {
+      sessionStore.recordHandler.markAsRendered()
+    }
+  }
+
   async function SelectedCategoryContent(categoryObj, targetedLayer, createdAt) {
     const { id, name, has_content } = categoryObj
 
@@ -92,7 +102,7 @@ export const useContentStore = defineStore('content', () => {
     return await LoadMoreLayeredContent(currentSearchedId, prevPage, createdAt)
   }
 
-  async function BackToMainMenu(currentLayer, createdAt) {
+  async function BackToMainMenuContent(currentLayer, createdAt) {
     if (currentLayer > 1) {
       const menuUtamaObj = {
         id: null,
@@ -142,23 +152,16 @@ export const useContentStore = defineStore('content', () => {
     return await sessionStore.sessionHandler.update()
   }
 
-  async function ShowErrorContent() {
-    sessionStore.recordHandler.markSelectedCategory()
-    const ready = useTimeout(delayTyping)
-    sessionStore.recordHandler.addErrorMessage()
-    await promiseTimeout(delayTyping)
-    if (ready.value) {
-      sessionStore.recordHandler.markAsRendered()
-    }
-  }
+  async function RenderCategoryContent(categoryId) {}
 
   return {
     isFocused,
     StartUpContent,
+    ShowErrorContent,
     SelectedCategoryContent,
     LoadMoreLayeredContent,
     BackToContent,
-    BackToMainMenu
+    BackToMainMenuContent
   }
 })
 

@@ -50,7 +50,8 @@ const prevPage = props.record.paginations.previous
         >
       </li>
       <li v-if="currLayer > 1">
-        <ButtonCategory @click.prevent="contentStore.BackToMainMenu(currLayer, props.record.time)"
+        <ButtonCategory
+          @click.prevent="contentStore.BackToMainMenuContent(currLayer, props.record.time)"
           >Go Main Menu</ButtonCategory
         >
       </li>
