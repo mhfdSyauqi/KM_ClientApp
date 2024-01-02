@@ -21,7 +21,7 @@ const userMessage = props.record.message
     >
       <p class="break-words">{{ userMessage }}</p>
 
-      <p class="text-right text-xs text-gray-500">{{ userSendAt }}</p>
+      <p class="text-right text-xs text-gray-700">{{ userSendAt }}</p>
     </div>
   </div>
 </template>

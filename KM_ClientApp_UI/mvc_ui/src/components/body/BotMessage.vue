@@ -17,6 +17,10 @@ const props = defineProps({
 const botSendAt = useDateFormat(props.record.time, 'HH:mm')
 const botMessageText = props.record.message.text
 const botMessageType = props.record.message.type
+
+function LoadAlterNative(e) {
+  e.target.src = appIcon
+}
 </script>
 
 <template>
@@ -24,8 +28,9 @@ const botMessageType = props.record.message.type
     <div class="basis-[12%]">
       <img
         class="w-[70%] h-[70%] rounded-full"
-        :src="configStore.appConfig?.app_image ?? appIcon"
-        alt="bg-app-logo"
+        @error.prevent="LoadAlterNative"
+        :src="configStore.appConfig?.app_image"
+        alt="appIcon"
         v-show="botMessageType === 'desc'"
       />
     </div>

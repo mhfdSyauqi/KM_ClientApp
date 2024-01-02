@@ -24,3 +24,16 @@ export async function GetReferenceCategoriesAsync(SearchedId) {
     reference: data.value?.data.reference_categories.ref_id
   }
 }
+
+export async function PostHeatSelectedCategory(SessionId, HeatName, HeatId = null) {
+  const PAYLOAD = {
+    Session_Id: SessionId,
+    Heat_Name: HeatName,
+    Heat_Id: HeatId
+  }
+  const { statusCode } = await useMyFetch(`category/heat`).post(PAYLOAD).json()
+
+  return {
+    is_success: statusCode.value === 204 ? true : false
+  }
+}

@@ -58,7 +58,7 @@ export const useSessionStore = defineStore('session', () => {
   }
 
   const recordHandler = {
-    addUserMessage: async (categoryId, categoryName) => {
+    addUserMessage: (categoryId, categoryName) => {
       const userRecord = {
         time: new Date().toISOString(),
         message: {
@@ -69,23 +69,35 @@ export const useSessionStore = defineStore('session', () => {
       }
       userSession.value.records.push(userRecord)
     },
-    addBotMessage: async (type, response) => {
-      let botRecord = {
+    addBotMessage: (messages) => {
+      const botMessage = {
         time: new Date().toISOString(),
         actor: 'bot',
+        message: messages,
         rendered: false
       }
-
-      if (type === 'category') {
-        botRecord.categories = response
-        botRecord.categories.selected = false
-      } else {
-        botRecord.message = response
-      }
-
-      userSession.value.records.push(botRecord)
+      userSession.value.records.push(botMessage)
     },
-    markSelectedCategory: async (createAt = null) => {
+    addBotCategory: (categories) => {
+      const botCategory = {
+        time: new Date().toISOString(),
+        actor: 'bot',
+        categories: {
+          selected: false,
+          ...categories
+        }
+      }
+      userSession.value.records.push(botCategory)
+    },
+    addErrorMessage: () => {
+      let errRecord = {
+        time: new Date().toISOString(),
+        actor: 'error',
+        rendered: false
+      }
+      userSession.value.records.push(errRecord)
+    },
+    markSelectedCategory: (createAt = null) => {
       userSession.value.records.map((record) => {
         if (createAt !== null && record.categories && record.time === createAt) {
           record.categories.selected = true
@@ -96,9 +108,9 @@ export const useSessionStore = defineStore('session', () => {
         }
       })
     },
-    markAsRendered: async () => {
+    markAsRendered: () => {
       userSession.value.records.map((record) => {
-        if (record.type !== 'category' && record.rendered === false) {
+        if (!record.categories && record.rendered === false) {
           record.rendered = !record.selected
         }
       })

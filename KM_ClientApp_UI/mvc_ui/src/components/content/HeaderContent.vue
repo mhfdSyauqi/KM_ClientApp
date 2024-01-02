@@ -3,6 +3,10 @@ import appIcon from '@/assets/appIcon.jpg'
 import { useConfigStore } from '@/stores/config'
 
 const configStore = useConfigStore()
+
+function LoadAlterNative(e) {
+  e.target.src = appIcon
+}
 </script>
 
 <template>
@@ -10,7 +14,8 @@ const configStore = useConfigStore()
     <div class="basis-[12%]">
       <img
         class="w-[60%] h-[60%] rounded-full"
-        :src="configStore.appConfig?.app_image ?? appIcon"
+        @error.prevent="LoadAlterNative"
+        :src="configStore.appConfig?.app_image"
       />
     </div>
     <h1 class="basis-[83%] font-semibold text-white">

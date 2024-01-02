@@ -33,7 +33,7 @@ const prevPage = props.record.paginations.previous
         </ButtonCategory>
       </li>
 
-      <li v-if="nextPage !== null || props.record.items.length > 0">
+      <li v-if="nextPage !== null">
         <ButtonCategory
           @click.prevent="
             contentStore.LoadMoreLayeredContent(currSearchedId, nextPage, props.record.time)
