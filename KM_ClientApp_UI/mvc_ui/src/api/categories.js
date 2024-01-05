@@ -8,8 +8,8 @@ export async function GetCategoriesAsync(SearchedId = null, PageNum = 1) {
   const { data, statusCode } = await useMyFetch(`category`).post(PAYLOAD).json()
 
   return {
-    is_success: statusCode.value === 200 ? true : false,
-    categories: data.value?.data.categories
+    categories: data.value?.data.categories,
+    is_success: statusCode.value === 200 ? true : false
   }
 }
 
@@ -20,8 +20,8 @@ export async function GetReferenceCategoriesAsync(SearchedId) {
   const { data, statusCode } = await useMyFetch(`category/ref`).post(PAYLOAD).json()
 
   return {
-    is_success: statusCode.value === 200 ? true : false,
-    reference: data.value?.data.reference_categories.ref_id
+    reference: data.value?.data.reference_categories.ref_id,
+    is_success: statusCode.value === 200 ? true : false
   }
 }
 
@@ -35,5 +35,37 @@ export async function PostHeatSelectedCategory(SessionId, HeatName, HeatId = nul
 
   return {
     is_success: statusCode.value === 204 ? true : false
+  }
+}
+
+export async function SearchCategoriesAsync(searchedKeyword, nextPage = 1) {
+  const PAYLOAD = {
+    Searched_Keyword: searchedKeyword,
+    Current_Page: nextPage
+  }
+  const { statusCode, data } = await useMyFetch(`category/search`).post(PAYLOAD).json()
+
+  return {
+    categories: data.value?.data.searched_categories,
+    is_success: statusCode.value === 200 ? true : false,
+    is_not_found: statusCode.value === 404 ? true : false,
+    is_single:
+      data.value?.data.searched_categories.items.length === 1 &&
+      data.value?.data.searched_categories.paginations.next === null &&
+      data.value?.data.searched_categories.paginations.current === 1
+        ? true
+        : false
+  }
+}
+
+export async function SuggestCategoriesAsync(nextPage = 1) {
+  const PAYLOAD = {
+    Current_Page: nextPage
+  }
+  const { statusCode, data } = await useMyFetch(`category/suggest`).post(PAYLOAD).json()
+
+  return {
+    is_success: statusCode.value === 200 ? true : false,
+    categories: data.value?.data.suggested_categories
   }
 }

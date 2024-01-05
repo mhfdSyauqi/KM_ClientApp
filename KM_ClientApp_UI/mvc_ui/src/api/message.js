@@ -1,6 +1,6 @@
 import { useMyFetch } from '@/shared/useMyFetch'
 
-export const MessageType = {
+export const MessageType = Object.freeze({
   closing: 'closing',
   feedback: 'feedback',
   idle: 'idle',
@@ -14,7 +14,7 @@ export const MessageType = {
   solved: 'solved',
   suggestion: 'suggestion',
   welcome: 'welcome'
-}
+})
 
 export async function GetMessageByTypeAsync(TYPE, SELECTED) {
   const PAYLOAD =
@@ -27,7 +27,7 @@ export async function GetMessageByTypeAsync(TYPE, SELECTED) {
   const { data, statusCode } = await useMyFetch(`message/${TYPE}`).post(PAYLOAD).json()
 
   return {
-    is_success: statusCode.value === 200 ? true : false,
-    messages: data.value?.data.messages
+    messages: data.value?.data.messages,
+    is_success: statusCode.value === 200 ? true : false
   }
 }

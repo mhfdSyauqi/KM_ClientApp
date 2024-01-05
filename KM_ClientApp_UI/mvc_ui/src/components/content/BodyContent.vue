@@ -16,7 +16,7 @@ import { onMounted, onUpdated, ref } from 'vue'
 
 const sessionStore = useSessionStore()
 const contentStore = useContentStore()
-const scrollPosition = ref(0)
+const scrollPosition = ref(null)
 
 onMounted(async () => {
   await sessionStore.sessionHandler.get()
@@ -53,7 +53,9 @@ onUpdated(async () => {
       </template>
     </template>
 
-    <span ref="scrollPosition">&nbsp;</span>
+    <span ref="scrollPosition">
+      <br />
+    </span>
   </div>
 </template>
 

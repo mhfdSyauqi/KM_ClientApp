@@ -35,7 +35,7 @@ public class CategoryController : MyAPIController
 
     [HttpPost]
     [Route("suggest")]
-    public async Task<IActionResult> SugestionCategories([FromBody] SuggestionCategoriesRequest request, CancellationToken cancellationToken)
+    public async Task<IActionResult> SuggestionCategories([FromBody] SuggestionCategoriesRequest request, CancellationToken cancellationToken)
     {
         var query = new SuggestionCategoriesQuery(request);
         var result = await Sender.Send(query, cancellationToken);

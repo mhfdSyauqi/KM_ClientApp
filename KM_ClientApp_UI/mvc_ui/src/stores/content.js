@@ -1,7 +1,9 @@
 import {
   GetCategoriesAsync,
   GetReferenceCategoriesAsync,
-  PostHeatSelectedCategory
+  PostHeatSelectedCategory,
+  SearchCategoriesAsync,
+  SuggestCategoriesAsync
 } from '@/api/categories'
 import { GetMessageByTypeAsync, MessageType } from '@/api/message'
 import { useConfigStore } from '@/stores/config'
@@ -16,6 +18,153 @@ export const useContentStore = defineStore('content', () => {
   const delayTyping = configStore.appConfig?.delay_typing ?? 500
 
   const isFocused = ref(false)
+  const isSystemErr = ref(false)
+
+  const Common = {
+    SelectedCategory: async (categoryObj, nextLayer, createAt) => {
+      const { id, name, has_content } = categoryObj
+
+      const heatResponse = await PostHeatSelectedCategory(sessionStore.userSession.id, name, id)
+      if (!heatResponse.is_success) {
+        return await ShowErrorContent()
+      }
+
+      if (has_content) {
+        return // Do Some Content Rendering
+      }
+
+      const msgType =
+        nextLayer === 3
+          ? MessageType.layer_three
+          : nextLayer === 2
+            ? MessageType.layer_two
+            : MessageType.layer_one
+
+      sessionStore.recordHandler.addUserMessage(id, name)
+      sessionStore.recordHandler.markSelectedCategory(createAt)
+
+      await ResponseLayeredContent({ searchedId: id, searchedName: name, messageType: msgType })
+    },
+    LoadMoreCategory: async (currentSearchedId, nextPage, createAt) => {
+      if (nextPage > 2 || nextPage === null) {
+        return (isFocused.value = true)
+      }
+
+      const categoriesResponse = await GetCategoriesAsync(currentSearchedId, nextPage)
+      if (!categoriesResponse.is_success) {
+        return await ShowErrorContent()
+      }
+
+      sessionStore.recordHandler.markSelectedCategory(createAt)
+      sessionStore.recordHandler.addBotCategory(categoriesResponse.categories)
+
+      const arrNew = useArrayFilter(sessionStore.userSession.records, (item) =>
+        item.categories ? item.categories.selected === false : item
+      )
+      sessionStore.userSession.records = arrNew.value
+
+      return await sessionStore.sessionHandler.update()
+    },
+    GoBackCategory: async (currentSearchedId, currLayer, prevPage, createAt) => {
+      if (currLayer > 1 && prevPage === null) {
+        const refResponse = await GetReferenceCategoriesAsync(currentSearchedId)
+        if (!refResponse.is_success) {
+          return await ShowErrorContent()
+        }
+
+        const contentObj = {
+          id: refResponse.reference,
+          name: currLayer === 3 ? 'Menu Sebelumnya' : 'Menu Utama'
+        }
+
+        sessionStore.recordHandler.addUserMessage(contentObj.id, contentObj.name)
+        sessionStore.recordHandler.markSelectedCategory(createAt)
+
+        return await ResponseLayeredContent({
+          searchedId: contentObj.id,
+          searchedName: contentObj.name,
+          messageType: MessageType.layer_one
+        })
+      }
+      return await Common.LoadMoreCategory(currentSearchedId, prevPage, createAt)
+    },
+    GoMainMenu: async (currentLayer, createAt) => {
+      if (currentLayer > 1) {
+        const menuUtamaObj = {
+          id: null,
+          name: 'Menu Utama'
+        }
+
+        sessionStore.recordHandler.addUserMessage(menuUtamaObj.id, menuUtamaObj.name)
+        sessionStore.recordHandler.markSelectedCategory(createAt)
+
+        return await ResponseLayeredContent({
+          searchedId: menuUtamaObj.id,
+          searchedName: menuUtamaObj.name,
+          messageType: MessageType.layer_one
+        })
+      }
+    }
+  }
+
+  const Searched = {
+    SelectedCategory: async (categoryObj, createAt) => {
+      const { id, name, has_content } = categoryObj
+
+      const heatResponse = await PostHeatSelectedCategory(sessionStore.userSession.id, name, id)
+      if (!heatResponse.is_success || !has_content) {
+        return await ShowErrorContent()
+      }
+
+      sessionStore.recordHandler.addUserMessage(id, name)
+      sessionStore.recordHandler.markSelectedCategory(createAt)
+
+      // Do Some Content Rendering
+    },
+    LoadMoreCategory: async (currentSearchedKeyword, nextPage, createAt) => {
+      if (nextPage === null) {
+        return (isFocused.value = true)
+      }
+
+      const categoriesResponse = currentSearchedKeyword
+        ? await SearchCategoriesAsync(currentSearchedKeyword, nextPage)
+        : await SuggestCategoriesAsync(nextPage)
+
+      if (!categoriesResponse.is_success) {
+        return await ShowErrorContent()
+      }
+
+      sessionStore.recordHandler.markSelectedCategory(createAt)
+      sessionStore.recordHandler.addBotCategory(categoriesResponse.categories)
+
+      const arrNew = useArrayFilter(sessionStore.userSession.records, (item) =>
+        item.categories ? item.categories.selected === false : item
+      )
+      sessionStore.userSession.records = arrNew.value
+
+      return await sessionStore.sessionHandler.update()
+    },
+    GoBackCategory: async (currSearchedKeyword, prevPage, createAt) => {
+      if (prevPage !== null) {
+        return await Searched.LoadMoreCategory(currSearchedKeyword, prevPage, createAt)
+      }
+    },
+    GoMainMenu: async (createAt) => {
+      const menuUtamaObj = {
+        id: null,
+        name: 'Menu Utama'
+      }
+
+      sessionStore.recordHandler.addUserMessage(menuUtamaObj.id, menuUtamaObj.name)
+      sessionStore.recordHandler.markSelectedCategory(createAt)
+
+      return await ResponseLayeredContent({
+        searchedId: menuUtamaObj.id,
+        searchedName: menuUtamaObj.name,
+        messageType: MessageType.layer_one
+      })
+    }
+  }
 
   async function StartUpContent() {
     await ResponseLayeredContent({ messageType: MessageType.welcome })
@@ -29,95 +178,7 @@ export const useContentStore = defineStore('content', () => {
     if (ready.value) {
       sessionStore.recordHandler.markAsRendered()
     }
-  }
-
-  async function SelectedCategoryContent(categoryObj, targetedLayer, createdAt) {
-    const { id, name, has_content } = categoryObj
-
-    const heatResponse = await PostHeatSelectedCategory(sessionStore.userSession.id, name, id)
-
-    if (!heatResponse.is_success) {
-      return await ShowErrorContent()
-    }
-
-    if (has_content) {
-      return await ShowErrorContent()
-    }
-    sessionStore.recordHandler.addUserMessage(id, name)
-    sessionStore.recordHandler.markSelectedCategory(createdAt)
-
-    const MSG_TYPE =
-      targetedLayer === 3
-        ? MessageType.layer_three
-        : targetedLayer === 2
-          ? MessageType.layer_two
-          : MessageType.layer_one
-
-    await ResponseLayeredContent({ searchedId: id, searchedName: name, messageType: MSG_TYPE })
-  }
-
-  async function LoadMoreLayeredContent(currentSearchedId, nextPage, createdAt) {
-    if (nextPage > 2 || nextPage === null) {
-      // Optional Give Message And User Flow
-      return (isFocused.value = true)
-    }
-
-    const categoriesResponse = await GetCategoriesAsync(currentSearchedId, nextPage)
-    if (!categoriesResponse.is_success) {
-      return await ShowErrorContent()
-    }
-
-    sessionStore.recordHandler.markSelectedCategory(createdAt)
-    sessionStore.recordHandler.addBotCategory(categoriesResponse.categories)
-
-    const arrNew = useArrayFilter(sessionStore.userSession.records, (item) =>
-      item.categories ? item.categories.selected === false : item
-    )
-    sessionStore.userSession.records = arrNew.value
-
-    return await sessionStore.sessionHandler.update()
-  }
-
-  async function BackToContent(currentSearchedId, targetedLayer, prevPage, createdAt) {
-    if (targetedLayer > 1 && prevPage === null) {
-      const refResponse = await GetReferenceCategoriesAsync(currentSearchedId)
-      if (!refResponse.is_success) {
-        return await ShowErrorContent()
-      }
-
-      const contentObj = {
-        id: refResponse.reference,
-        name: targetedLayer === 3 ? 'Menu Sebelumnya' : 'Menu Utama'
-      }
-
-      sessionStore.recordHandler.addUserMessage(contentObj.id, contentObj.name)
-      sessionStore.recordHandler.markSelectedCategory(createdAt)
-
-      return await ResponseLayeredContent({
-        searchedId: contentObj.id,
-        searchedName: contentObj.name,
-        messageType: MessageType.layer_one
-      })
-    }
-    return await LoadMoreLayeredContent(currentSearchedId, prevPage, createdAt)
-  }
-
-  async function BackToMainMenuContent(currentLayer, createdAt) {
-    if (currentLayer > 1) {
-      const menuUtamaObj = {
-        id: null,
-        name: 'Menu Utama'
-      }
-
-      sessionStore.recordHandler.addUserMessage(menuUtamaObj.id, menuUtamaObj.name)
-      sessionStore.recordHandler.markSelectedCategory(createdAt)
-
-      return await ResponseLayeredContent({
-        searchedId: menuUtamaObj.id,
-        searchedName: menuUtamaObj.name,
-        messageType: MessageType.layer_one
-      })
-    }
+    isSystemErr.value = true
   }
 
   async function ResponseLayeredContent({ searchedId, searchedName, pageNum, messageType }) {
@@ -152,16 +213,111 @@ export const useContentStore = defineStore('content', () => {
     return await sessionStore.sessionHandler.update()
   }
 
-  async function RenderCategoryContent(categoryId) {}
+  async function SearchedCategoryContent(searchedKeyword, pageNum) {
+    const response = await Promise.allSettled([
+      SearchCategoriesAsync(searchedKeyword, pageNum),
+      GetMessageByTypeAsync(MessageType.searched, searchedKeyword)
+    ])
+
+    const categoriesResponse = response[0].value
+    const messageResponse = response[1].value
+
+    const heatResponse = await PostHeatSelectedCategory(
+      sessionStore.userSession.id,
+      searchedKeyword,
+      null
+    )
+
+    sessionStore.recordHandler.addUserMessage(null, searchedKeyword)
+
+    if (
+      (!categoriesResponse.is_success && !categoriesResponse.is_not_found) ||
+      !messageResponse.is_success ||
+      !heatResponse.is_success
+    ) {
+      return await ShowErrorContent()
+    }
+
+    if (categoriesResponse.is_not_found) {
+      return await SuggestedCategoryContent(searchedKeyword, pageNum)
+    }
+
+    if (categoriesResponse.single) {
+      return // Render Single Content
+    }
+
+    sessionStore.recordHandler.markSelectedCategory()
+
+    for (let i = 0; i <= messageResponse.messages.length - 1; i++) {
+      const ready = useTimeout(delayTyping * i)
+      const message = messageResponse.messages[i]
+      sessionStore.recordHandler.addBotMessage(message)
+      await promiseTimeout(delayTyping)
+      if (ready.value) {
+        sessionStore.recordHandler.markAsRendered()
+      }
+    }
+
+    sessionStore.recordHandler.addBotCategory(categoriesResponse.categories)
+    const arrNew = useArrayFilter(sessionStore.userSession.records, (item) =>
+      item.categories ? item.categories.selected === false : item
+    )
+    sessionStore.userSession.records = arrNew.value
+
+    return await sessionStore.sessionHandler.update()
+  }
+
+  async function SuggestedCategoryContent(searchedKeyword, pageNum) {
+    const response = await Promise.allSettled([
+      GetMessageByTypeAsync(MessageType.not_found, searchedKeyword),
+      SuggestCategoriesAsync(pageNum),
+      GetMessageByTypeAsync(MessageType.suggestion)
+    ])
+
+    const notFoundResponse = response[0].value
+    const categoriesResponse = response[1].value
+    const messageResponse = response[2].value
+
+    if (
+      !notFoundResponse.is_success ||
+      !categoriesResponse.is_success ||
+      !messageResponse.is_success
+    ) {
+      return await ShowErrorContent()
+    }
+
+    sessionStore.recordHandler.markSelectedCategory()
+
+    notFoundResponse.messages.map((msg) => (msg.type = 'message'))
+    const messages = [...notFoundResponse.messages, ...messageResponse.messages]
+
+    for (let i = 0; i <= messages.length - 1; i++) {
+      const ready = useTimeout(delayTyping * i)
+      const message = messages[i]
+      sessionStore.recordHandler.addBotMessage(message)
+      await promiseTimeout(delayTyping)
+      if (ready.value) {
+        sessionStore.recordHandler.markAsRendered()
+      }
+    }
+
+    sessionStore.recordHandler.addBotCategory(categoriesResponse.categories)
+    const arrNew = useArrayFilter(sessionStore.userSession.records, (item) =>
+      item.categories ? item.categories.selected === false : item
+    )
+    sessionStore.userSession.records = arrNew.value
+
+    return await sessionStore.sessionHandler.update()
+  }
 
   return {
     isFocused,
+    isSystemErr,
     StartUpContent,
     ShowErrorContent,
-    SelectedCategoryContent,
-    LoadMoreLayeredContent,
-    BackToContent,
-    BackToMainMenuContent
+    Common,
+    Searched,
+    SearchedCategoryContent
   }
 })
 
