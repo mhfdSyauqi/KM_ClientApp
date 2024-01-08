@@ -5,10 +5,13 @@ import {
   SearchCategoriesAsync,
   SuggestCategoriesAsync
 } from '@/api/categories'
+import { GetContentByIdAsync } from '@/api/content'
 import { GetMessageByTypeAsync, MessageType } from '@/api/message'
+
 import { useConfigStore } from '@/stores/config'
 import { useSessionStore } from '@/stores/session'
-import { promiseTimeout, useArrayFilter, useTimeout } from '@vueuse/core'
+
+import { promiseTimeout, useTimeout } from '@vueuse/core'
 import { acceptHMRUpdate, defineStore } from 'pinia'
 import { ref } from 'vue'
 
@@ -30,7 +33,8 @@ export const useContentStore = defineStore('content', () => {
       }
 
       if (has_content) {
-        return // Do Some Content Rendering
+        sessionStore.recordHandler.markSelectedCategory(createAt)
+        return await ResponseSelectedContent(id)
       }
 
       const msgType =
@@ -56,14 +60,7 @@ export const useContentStore = defineStore('content', () => {
       }
 
       sessionStore.recordHandler.markSelectedCategory(createAt)
-      sessionStore.recordHandler.addBotCategory(categoriesResponse.categories)
-
-      const arrNew = useArrayFilter(sessionStore.userSession.records, (item) =>
-        item.categories ? item.categories.selected === false : item
-      )
-      sessionStore.userSession.records = arrNew.value
-
-      return await sessionStore.sessionHandler.update()
+      return await Render.Category(categoriesResponse.categories)
     },
     GoBackCategory: async (currentSearchedId, currLayer, prevPage, createAt) => {
       if (currLayer > 1 && prevPage === null) {
@@ -119,7 +116,7 @@ export const useContentStore = defineStore('content', () => {
       sessionStore.recordHandler.addUserMessage(id, name)
       sessionStore.recordHandler.markSelectedCategory(createAt)
 
-      // Do Some Content Rendering
+      return await ResponseSelectedContent(id)
     },
     LoadMoreCategory: async (currentSearchedKeyword, nextPage, createAt) => {
       if (nextPage === null) {
@@ -135,14 +132,7 @@ export const useContentStore = defineStore('content', () => {
       }
 
       sessionStore.recordHandler.markSelectedCategory(createAt)
-      sessionStore.recordHandler.addBotCategory(categoriesResponse.categories)
-
-      const arrNew = useArrayFilter(sessionStore.userSession.records, (item) =>
-        item.categories ? item.categories.selected === false : item
-      )
-      sessionStore.userSession.records = arrNew.value
-
-      return await sessionStore.sessionHandler.update()
+      return await Render.Category(categoriesResponse.categories)
     },
     GoBackCategory: async (currSearchedKeyword, prevPage, createAt) => {
       if (prevPage !== null) {
@@ -194,23 +184,7 @@ export const useContentStore = defineStore('content', () => {
       return await ShowErrorContent()
     }
 
-    for (let i = 0; i <= messageResponse.messages.length - 1; i++) {
-      const ready = useTimeout(delayTyping * i)
-      const message = messageResponse.messages[i]
-      sessionStore.recordHandler.addBotMessage(message)
-      await promiseTimeout(delayTyping)
-      if (ready.value) {
-        sessionStore.recordHandler.markAsRendered()
-      }
-    }
-
-    sessionStore.recordHandler.addBotCategory(categoriesResponse.categories)
-    const arrNew = useArrayFilter(sessionStore.userSession.records, (item) =>
-      item.categories ? item.categories.selected === false : item
-    )
-    sessionStore.userSession.records = arrNew.value
-
-    return await sessionStore.sessionHandler.update()
+    return await Render.MessageWithCategory(messageResponse.messages, categoriesResponse.categories)
   }
 
   async function SearchedCategoryContent(searchedKeyword, pageNum) {
@@ -239,35 +213,38 @@ export const useContentStore = defineStore('content', () => {
     }
 
     if (categoriesResponse.is_not_found) {
-      return await SuggestedCategoryContent(searchedKeyword, pageNum)
+      return await NotFoundCategoryContent(searchedKeyword, pageNum)
     }
 
-    if (categoriesResponse.single) {
-      return // Render Single Content
+    if (categoriesResponse.is_single) {
+      const contentId = categoriesResponse.categories.items[0].id
+      const message = messageResponse.messages
+
+      return await SingleResponseContent(contentId, message)
     }
 
     sessionStore.recordHandler.markSelectedCategory()
-
-    for (let i = 0; i <= messageResponse.messages.length - 1; i++) {
-      const ready = useTimeout(delayTyping * i)
-      const message = messageResponse.messages[i]
-      sessionStore.recordHandler.addBotMessage(message)
-      await promiseTimeout(delayTyping)
-      if (ready.value) {
-        sessionStore.recordHandler.markAsRendered()
-      }
-    }
-
-    sessionStore.recordHandler.addBotCategory(categoriesResponse.categories)
-    const arrNew = useArrayFilter(sessionStore.userSession.records, (item) =>
-      item.categories ? item.categories.selected === false : item
-    )
-    sessionStore.userSession.records = arrNew.value
-
-    return await sessionStore.sessionHandler.update()
+    return await Render.MessageWithCategory(messageResponse.messages, categoriesResponse.categories)
   }
 
-  async function SuggestedCategoryContent(searchedKeyword, pageNum) {
+  async function SuggestedCategoryContent(userInput, pageNum) {
+    const response = await Promise.allSettled([
+      GetMessageByTypeAsync(MessageType.suggestion),
+      SuggestCategoriesAsync(pageNum)
+    ])
+    const messageResponse = response[0].value
+    const categoriesResponse = response[1].value
+
+    if (!categoriesResponse.is_success || !messageResponse.is_success) {
+      return await ShowErrorContent()
+    }
+
+    sessionStore.recordHandler.addUserMessage(null, userInput)
+    sessionStore.recordHandler.markSelectedCategory()
+    return await Render.MessageWithCategory(messageResponse.messages, categoriesResponse.categories)
+  }
+
+  async function NotFoundCategoryContent(searchedKeyword, pageNum) {
     const response = await Promise.allSettled([
       GetMessageByTypeAsync(MessageType.not_found, searchedKeyword),
       SuggestCategoriesAsync(pageNum),
@@ -291,23 +268,100 @@ export const useContentStore = defineStore('content', () => {
     notFoundResponse.messages.map((msg) => (msg.type = 'message'))
     const messages = [...notFoundResponse.messages, ...messageResponse.messages]
 
-    for (let i = 0; i <= messages.length - 1; i++) {
-      const ready = useTimeout(delayTyping * i)
-      const message = messages[i]
-      sessionStore.recordHandler.addBotMessage(message)
+    return await Render.MessageWithCategory(messages, categoriesResponse.categories)
+  }
+
+  async function ResponseSelectedContent(contentId) {
+    const contentResponse = await GetContentByIdAsync(contentId)
+    const messageResponse = await GetMessageByTypeAsync(MessageType.solved)
+
+    if (!contentResponse.is_success || !messageResponse.is_success) {
+      return await ShowErrorContent()
+    }
+
+    return await Render.Response(contentResponse.content, messageResponse.messages, null)
+  }
+
+  async function SingleResponseContent(contentId, singleMessage) {
+    const contentResponse = await GetContentByIdAsync(contentId)
+    const messageResponse = await GetMessageByTypeAsync(MessageType.solved)
+
+    if (!contentResponse.is_success || !messageResponse.is_success) {
+      return await ShowErrorContent()
+    }
+    return await Render.Response(contentResponse.content, messageResponse.messages, singleMessage)
+  }
+
+  async function EndConversationContent(endedBy = null) {
+    const messageResponse = await GetMessageByTypeAsync(MessageType.closing)
+
+    if (!messageResponse.is_success) {
+      return await ShowErrorContent()
+    }
+
+    sessionStore.recordHandler.addUserMessage(null, 'No')
+    sessionStore.recordHandler.markSelectedCategory()
+
+    await Render.Message(messageResponse.messages)
+
+    sessionStore.userSession.is_active = false
+    return await sessionStore.sessionHandler.end(endedBy)
+  }
+
+  const Render = {
+    Category: async (categories) => {
+      sessionStore.recordHandler.addBotCategory(categories)
+      await sessionStore.sessionHandler.update()
+    },
+    Message: async (messages) => {
+      for (let i = 0; i <= messages.length - 1; i++) {
+        const ready = useTimeout(delayTyping * i)
+        const message = messages[i]
+        sessionStore.recordHandler.addBotMessage(message)
+        await promiseTimeout(delayTyping)
+        if (ready.value) {
+          sessionStore.recordHandler.markAsRendered()
+        }
+      }
+      await sessionStore.sessionHandler.update()
+    },
+    MessageWithCategory: async (messages, categories) => {
+      for (let i = 0; i <= messages.length - 1; i++) {
+        const ready = useTimeout(delayTyping * i)
+        const message = messages[i]
+        sessionStore.recordHandler.addBotMessage(message)
+        await promiseTimeout(delayTyping)
+        if (ready.value) {
+          sessionStore.recordHandler.markAsRendered()
+        }
+      }
+      sessionStore.recordHandler.addBotCategory(categories)
+      await sessionStore.sessionHandler.update()
+    },
+    Response: async (content, endMessage, singleMessage) => {
+      const { ready, start } = useTimeout(delayTyping, { controls: true })
+      sessionStore.recordHandler.addBotContent(content, singleMessage)
       await promiseTimeout(delayTyping)
       if (ready.value) {
         sessionStore.recordHandler.markAsRendered()
+        start()
       }
+
+      await promiseTimeout(delayTyping * 4)
+      endMessage?.map((msg) => (msg.type = 'message'))
+      for (let i = 0; i <= endMessage.length - 1; i++) {
+        start()
+        const message = endMessage[i]
+        sessionStore.recordHandler.addBotMessage(message)
+        await promiseTimeout(delayTyping)
+        if (ready.value) {
+          sessionStore.recordHandler.markAsRendered()
+        }
+      }
+
+      sessionStore.recordHandler.addBotCategory({ is_closed: true })
+      await sessionStore.sessionHandler.update()
     }
-
-    sessionStore.recordHandler.addBotCategory(categoriesResponse.categories)
-    const arrNew = useArrayFilter(sessionStore.userSession.records, (item) =>
-      item.categories ? item.categories.selected === false : item
-    )
-    sessionStore.userSession.records = arrNew.value
-
-    return await sessionStore.sessionHandler.update()
   }
 
   return {
@@ -317,7 +371,9 @@ export const useContentStore = defineStore('content', () => {
     ShowErrorContent,
     Common,
     Searched,
-    SearchedCategoryContent
+    SearchedCategoryContent,
+    SuggestedCategoryContent,
+    EndConversationContent
   }
 })
 

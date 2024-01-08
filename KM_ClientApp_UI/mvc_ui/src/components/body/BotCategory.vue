@@ -17,10 +17,10 @@ const createAt = props.record.time
 const currSearchedId = props.record.searched_identity
 const currSearchedKeyword = props.record.searched_keyword
 const currLayer = props.record.layer
-const currPage = props.record.paginations.current
+const currPage = props.record.paginations?.current
 const nextLayer = props.record.layer + 1
-const nextPage = props.record.paginations.next
-const prevPage = props.record.paginations.previous
+const nextPage = props.record.paginations?.next
+const prevPage = props.record.paginations?.previous
 
 async function SelectedCategory(categoryObj) {
   if (!isCommon) {
@@ -52,7 +52,10 @@ async function GoMainMenu() {
 </script>
 
 <template>
-  <div class="flex justify-start items-end" v-if="!props.record.selected">
+  <div
+    class="flex justify-start items-end"
+    v-if="!props.record.selected && !props.record.is_closed"
+  >
     <div class="basis-[12%]">&nbsp;</div>
     <ul class="basis-[70%] flex flex-row flex-wrap items-start gap-2 mr-7">
       <li
@@ -73,6 +76,22 @@ async function GoMainMenu() {
       </li>
       <li v-if="currLayer > 1 || !isCommon">
         <ButtonCategory @click.prevent="GoMainMenu">Go Main Menu</ButtonCategory>
+      </li>
+    </ul>
+  </div>
+
+  <div class="flex justify-start items-end" v-if="!props.record.selected && props.record.is_closed">
+    <div class="basis-[12%]">&nbsp;</div>
+    <ul class="basis-[70%] flex flex-row flex-wrap items-start gap-2 mr-7">
+      <li>
+        <ButtonCategory @click.prevent="contentStore.SuggestedCategoryContent('Ya', 1)">
+          Ya
+        </ButtonCategory>
+      </li>
+      <li>
+        <ButtonCategory @click.prevent="contentStore.EndConversationContent()">
+          Tidak
+        </ButtonCategory>
       </li>
     </ul>
   </div>

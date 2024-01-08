@@ -11,7 +11,7 @@ public class ContentController : MyAPIController
     {
     }
 
-    [HttpGet]
+    [HttpPost]
     public async Task<IActionResult> GetContentById([FromBody] BotContentRequest contentRequest, CancellationToken cancellationToken)
     {
         var query = new GetContentQuery(contentRequest);

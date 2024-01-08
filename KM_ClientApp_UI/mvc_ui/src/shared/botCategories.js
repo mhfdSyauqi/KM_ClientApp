@@ -8,6 +8,7 @@ class BotCategories {
     this.items = categories.items
     this.paginations = categories.paginations
     this.time = categories.time
+    this.is_closed = categories.is_closed
   }
 }
 

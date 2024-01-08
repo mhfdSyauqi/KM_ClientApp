@@ -20,7 +20,7 @@ public class GetBotMessageQueryHandler : IQueryHandler<GetBotMessageQuery, List<
     public async Task<Result<List<BotMessageResponse>>> Handle(GetBotMessageQuery request, CancellationToken cancellationToken)
     {
         var message = await _messageRepository.GetBotMessageAsync(request.Type, request.MessageRequest, cancellationToken);
-        int msgCount = message.Count();
+        var msgCount = message.Count();
 
         if (msgCount == 0)
         {
@@ -29,7 +29,7 @@ public class GetBotMessageQueryHandler : IQueryHandler<GetBotMessageQuery, List<
                 "There is no message found in databases"));
         }
 
-        List<BotMessageResponse> response = message.Select(row => new BotMessageResponse
+        var response = message.Select(row => new BotMessageResponse
         {
             Type = row.Sequence == msgCount ? "desc" : "message",
             Text = row.Contents,

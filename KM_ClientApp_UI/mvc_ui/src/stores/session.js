@@ -1,5 +1,6 @@
 import { useMyFetch } from '@/shared/useMyFetch'
 import { useContentStore } from '@/stores/content'
+import { useArrayFilter } from '@vueuse/core'
 import { acceptHMRUpdate, defineStore } from 'pinia'
 import { ref } from 'vue'
 
@@ -35,6 +36,11 @@ export const useSessionStore = defineStore('session', () => {
       }
     },
     update: async () => {
+      const arrNew = useArrayFilter(userSession.value.records, (item) =>
+        item.categories ? item.categories.selected === false : item
+      )
+      userSession.value.records = arrNew.value
+
       const patchSessionRequest = {
         Id: userSession.value.id,
         New_Records: JSON.stringify(userSession.value.records)
@@ -99,6 +105,18 @@ export const useSessionStore = defineStore('session', () => {
         rendered: false
       }
       userSession.value.records.push(errRecord)
+    },
+    addBotContent: (responseContent, singleMessage = null) => {
+      let contentRecord = {
+        time: new Date().toISOString(),
+        actor: 'bot',
+        content: {
+          ...responseContent,
+          messages: singleMessage?.length > 0 ? singleMessage : []
+        },
+        rendered: false
+      }
+      userSession.value.records.push(contentRecord)
     },
     markSelectedCategory: (createAt = null) => {
       userSession.value.records.map((record) => {

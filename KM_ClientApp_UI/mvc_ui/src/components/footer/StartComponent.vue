@@ -1,7 +1,7 @@
 <script setup></script>
 
 <template>
-  <div>Feedback Bro</div>
+  <div>Start</div>
 </template>
 
 <style scoped></style>

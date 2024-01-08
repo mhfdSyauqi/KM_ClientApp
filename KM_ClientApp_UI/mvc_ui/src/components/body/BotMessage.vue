@@ -37,7 +37,7 @@ function LoadAlterNative(e) {
     <div
       class="basis-auto max-w-[50%] h-full text-sm bg-white drop-shadow-lg p-3 rounded-xl rounded-bl-none"
     >
-      <p class="break-words">{{ botMessageText }}</p>
+      <p class="break-words min-h-8">{{ botMessageText }}</p>
 
       <p class="text-right text-xs text-gray-500">{{ botSendAt }}</p>
     </div>

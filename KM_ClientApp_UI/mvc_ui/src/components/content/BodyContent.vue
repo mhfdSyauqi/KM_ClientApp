@@ -1,11 +1,13 @@
 <script setup>
 import BotCategory from '@/components/body/BotCategory.vue'
+import BotContent from '@/components/body/BotContent.vue'
 import BotError from '@/components/body/BotError.vue'
 import BotMessage from '@/components/body/BotMessage.vue'
 import BotTyping from '@/components/body/BotTyping.vue'
 import UserMessage from '@/components/body/UserMessage.vue'
 
 import BotCategories from '@/shared/botCategories'
+import BotResponseContent from '@/shared/botContent.js'
 import BotRecord from '@/shared/botRecord'
 import UserRecord from '@/shared/userRecord'
 
@@ -41,6 +43,11 @@ onUpdated(async () => {
 
       <template v-if="item.actor === 'bot' && item.categories">
         <BotCategory :record="new BotCategories(item.categories)" />
+      </template>
+
+      <template v-if="item.actor === 'bot' && item.content">
+        <BotTyping v-if="!item.rendered" />
+        <BotContent v-else :record="new BotResponseContent(item.content)" />
       </template>
 
       <template v-if="item.actor === 'user'">
