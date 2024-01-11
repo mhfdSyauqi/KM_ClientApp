@@ -71,7 +71,7 @@ export const useContentStore = defineStore('content', () => {
 
         const contentObj = {
           id: refResponse.reference,
-          name: currLayer === 3 ? 'Menu Sebelumnya' : 'Menu Utama'
+          name: currLayer === 3 ? 'Back' : 'Main Menu'
         }
 
         sessionStore.recordHandler.addUserMessage(contentObj.id, contentObj.name)
@@ -89,7 +89,7 @@ export const useContentStore = defineStore('content', () => {
       if (currentLayer > 1) {
         const menuUtamaObj = {
           id: null,
-          name: 'Menu Utama'
+          name: 'Main Menu'
         }
 
         sessionStore.recordHandler.addUserMessage(menuUtamaObj.id, menuUtamaObj.name)
@@ -142,7 +142,7 @@ export const useContentStore = defineStore('content', () => {
     GoMainMenu: async (createAt) => {
       const menuUtamaObj = {
         id: null,
-        name: 'Menu Utama'
+        name: 'Main Menu'
       }
 
       sessionStore.recordHandler.addUserMessage(menuUtamaObj.id, menuUtamaObj.name)
@@ -188,6 +188,10 @@ export const useContentStore = defineStore('content', () => {
   }
 
   async function SearchedCategoryContent(searchedKeyword, pageNum) {
+    if (searchedKeyword.toLowerCase() === 'main menu') {
+      return await Searched.GoMainMenu()
+    }
+
     const response = await Promise.allSettled([
       SearchCategoriesAsync(searchedKeyword, pageNum),
       GetMessageByTypeAsync(MessageType.searched, searchedKeyword)

@@ -17,17 +17,18 @@ export const MessageType = Object.freeze({
 })
 
 export async function GetMessageByTypeAsync(TYPE, SELECTED) {
-  const PAYLOAD =
+  const PAYLOAD = JSON.stringify(
     SELECTED !== null
       ? {
           Selected_Category: SELECTED
         }
       : {}
+  )
 
   const { data, statusCode } = await useMyFetch(`message/${TYPE}`).post(PAYLOAD).json()
 
   return {
     messages: data.value?.data.messages,
-    is_success: statusCode.value === 200 ? true : false
+    is_success: statusCode.value === 200
   }
 }

@@ -1,23 +1,3 @@
-<template>
-  <BaseLayout v-if="isLoaded">
-    <template #header>
-      <HeaderContent />
-    </template>
-
-    <template #body>
-      <BodyContent />
-    </template>
-
-    <template #footer>
-      <FooterContent />
-    </template>
-  </BaseLayout>
-
-  <ErrorLayout v-else />
-</template>
-
-<style scoped></style>
-
 <script setup>
 import BaseLayout from '@/components/BaseLayout.vue'
 import ErrorLayout from '@/components/ErrorLayout.vue'
@@ -40,3 +20,23 @@ onBeforeMount(async () => {
   }
 })
 </script>
+
+<template>
+  <BaseLayout v-if="isLoaded">
+    <template #header>
+      <HeaderContent />
+    </template>
+
+    <template #body>
+      <BodyContent />
+    </template>
+
+    <template #footer>
+      <FooterContent />
+    </template>
+  </BaseLayout>
+
+  <ErrorLayout v-else />
+</template>
+
+<style scoped></style>
