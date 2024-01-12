@@ -15,16 +15,16 @@ export const useConfigStore = defineStore('config', () => {
   })
 
   async function InitAppConfig() {
-    const apiOption = await fetch('https://localhost:44356/api/configx', {
+    const apiOption = await fetch('https://localhost:44356/api/config', {
       method: 'GET',
       credentials: 'include'
-    });
+    })
 
     if (apiOption.status === 200) {
-      const response = await apiOption.json();
+      const response = await apiOption.json()
 
-      appConfig.app_image = response.data.configurations.app_image;
-      appConfig.app_name = response.data.configurations.app_name;
+      appConfig.app_image = response.data.configurations.app_image
+      appConfig.app_name = response.data.configurations.app_name
     }
   }
 

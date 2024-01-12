@@ -89,7 +89,7 @@ async function UserSubmit() {
 </script>
 
 <template>
-  <div class="ml-9 mt-3 rounded-lg flex drop-shadow-md group bg-transparent">
+  <div class="ml-9 mt-5 rounded-lg flex drop-shadow-md group bg-transparent">
     <p
       ref="infoEl"
       class="absolute -top-7 lg:-top-5 left-1 text-xs lg:text-sm"
@@ -106,7 +106,7 @@ async function UserSubmit() {
       ref="searchEl"
       v-model="searchInput"
       @input="CheckUserInput"
-      @keypress.enter="UserSubmit"
+      @keydown.enter.prevent="UserSubmit"
       class="w-[85%] rounded-l-lg py-2 px-3 border-2 border-r-0 resize-none focus:outline-none focus:border-lime-300 placeholder:italic placeholder:text-sm"
       placeholder="Insert keyword....."
       rows="1"

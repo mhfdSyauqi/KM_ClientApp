@@ -8,22 +8,20 @@ import { onMounted, ref } from 'vue'
 const configStore = useConfigStore()
 const iframe = ref(null)
 
-onMounted(async () => {
-  iframe.value.src = 'https://mhfdsyauqi.github.io/km_statis/'
+onMounted(() => {
+  iframe.value.src = 'http://localhost:5173'
 
   // Implement This Later
   // await RenderIframe()
 })
 
 async function RenderIframe() {
-  const apiOption = await fetch('https://mhfdsyauqi.github.io/km_statis/', {
+  const apiOption = await fetch('http://localhost:5173', {
     method: 'GET',
     credentials: 'include'
   })
 
   iframe.value.contentDocument.write('<h1>Hello World</h1>')
-
-  console.log(apiOption)
 }
 </script>
 
