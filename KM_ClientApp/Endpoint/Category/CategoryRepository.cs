@@ -40,6 +40,34 @@ public class CategoryRepository : ICategoryRepository
         return result;
     }
 
+    public async Task<int> GetReAskedCategoryAsync(ReAskedRequest request, CancellationToken cancellationToken)
+    {
+        using var connection = await _connection.CreateConnectionAsync();
+
+        string query = @"
+            SELECT 
+	            [total_asked]
+            FROM 
+	            [dbo].[View_User_Session_History]
+            WHERE
+                [time] = CAST(@Create_At as date) AND
+                [create_by] = @Create_By AND
+                [uid_bot_category] = @Category_Id                
+        ";
+
+        var param = new
+        {
+            request.Create_At,
+            request.Create_By,
+            Category_Id = Guid.Parse(request.Category_Id)
+        };
+
+        var command = new CommandDefinition(query, param, cancellationToken: cancellationToken);
+        var result = await connection.QueryFirstOrDefaultAsync<int>(command);
+
+        return result;
+    }
+
     public async Task<IEnumerable<Categories>> GetCategoryByIdentityAsync(GetCategoriesRequest request, CancellationToken cancellationToken)
     {
         using var connection = await _connection.CreateConnectionAsync();
@@ -68,7 +96,7 @@ public class CategoryRepository : ICategoryRepository
     {
         using var connection = await _connection.CreateConnectionAsync();
 
-        var query = @"
+        string query = @"
                SELECT 
 	                [uid_reference]
                 FROM 
@@ -130,4 +158,6 @@ public interface ICategoryRepository
     Task<IEnumerable<Categories>> GetSuggestionCategoryAsync(SuggestionCategoriesRequest request, CancellationToken cancellationToken);
 
     Task<int> AddHeatCategoryAsync(HeatCategoriesRequest request, CancellationToken cancellationToken);
+
+    Task<int> GetReAskedCategoryAsync(ReAskedRequest request, CancellationToken cancellationToken);
 }

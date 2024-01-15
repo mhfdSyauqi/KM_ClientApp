@@ -3,7 +3,8 @@ import {
   GetReferenceCategoriesAsync,
   PostHeatSelectedCategory,
   SearchCategoriesAsync,
-  SuggestCategoriesAsync
+  SuggestCategoriesAsync,
+  ReAskedCategoryStatus
 } from '@/api/categories'
 import { GetContentByIdAsync } from '@/api/content'
 import { GetMessageByTypeAsync, MessageType } from '@/api/message'
@@ -27,13 +28,21 @@ export const useContentStore = defineStore('content', () => {
     SelectedCategory: async (categoryObj, nextLayer, createAt) => {
       const { id, name, has_content } = categoryObj
 
+      const { count } = await ReAskedCategoryStatus(id)
       const heatResponse = await PostHeatSelectedCategory(sessionStore.userSession.id, name, id)
+
       if (!heatResponse.is_success) {
         return await ShowErrorContent()
       }
 
-      if (has_content) {
-        sessionStore.recordHandler.markSelectedCategory(createAt)
+      sessionStore.recordHandler.addUserMessage(id, name)
+      sessionStore.recordHandler.markSelectedCategory(createAt)
+
+      if (has_content && count > 0) {
+        return await ReAskedSelectedContent(id, name)
+      }
+
+      if (has_content && count === 0) {
         return await ResponseSelectedContent(id)
       }
 
@@ -43,9 +52,6 @@ export const useContentStore = defineStore('content', () => {
           : nextLayer === 2
             ? MessageType.layer_two
             : MessageType.layer_one
-
-      sessionStore.recordHandler.addUserMessage(id, name)
-      sessionStore.recordHandler.markSelectedCategory(createAt)
 
       await ResponseLayeredContent({ searchedId: id, searchedName: name, messageType: msgType })
     },
@@ -108,6 +114,7 @@ export const useContentStore = defineStore('content', () => {
     SelectedCategory: async (categoryObj, createAt) => {
       const { id, name, has_content } = categoryObj
 
+      const { count } = await ReAskedCategoryStatus(id)
       const heatResponse = await PostHeatSelectedCategory(sessionStore.userSession.id, name, id)
       if (!heatResponse.is_success || !has_content) {
         return await ShowErrorContent()
@@ -115,6 +122,10 @@ export const useContentStore = defineStore('content', () => {
 
       sessionStore.recordHandler.addUserMessage(id, name)
       sessionStore.recordHandler.markSelectedCategory(createAt)
+
+      if (count > 0) {
+        return await ReAskedSelectedContent(id, name)
+      }
 
       return await ResponseSelectedContent(id)
     },
@@ -312,6 +323,15 @@ export const useContentStore = defineStore('content', () => {
     return await sessionStore.sessionHandler.end(endedBy)
   }
 
+  async function ReAskedSelectedContent(contentId, contentName) {
+    const messageResponse = await GetMessageByTypeAsync(MessageType.reasked, contentName)
+    if (!messageResponse.is_success) {
+      return await ShowErrorContent()
+    }
+
+    return await Render.ReAsked(contentId, messageResponse.messages)
+  }
+
   const Render = {
     Category: async (categories) => {
       sessionStore.recordHandler.addBotCategory(categories)
@@ -365,6 +385,21 @@ export const useContentStore = defineStore('content', () => {
 
       sessionStore.recordHandler.addBotCategory({ is_closed: true })
       await sessionStore.sessionHandler.update()
+    },
+    ReAsked: async (contentId, reAskedMessages) => {
+      reAskedMessages?.map((msg) => (msg.type = 'message'))
+      for (let i = 0; i <= reAskedMessages.length - 1; i++) {
+        const ready = useTimeout(delayTyping)
+        const message = reAskedMessages[i]
+        sessionStore.recordHandler.addBotMessage(message)
+        await promiseTimeout(delayTyping)
+        if (ready.value) {
+          sessionStore.recordHandler.markAsRendered()
+        }
+      }
+
+      sessionStore.recordHandler.addBotCategory({ is_reasked: true, searched_identity: contentId })
+      await sessionStore.sessionHandler.update()
     }
   }
 
@@ -377,7 +412,8 @@ export const useContentStore = defineStore('content', () => {
     Searched,
     SearchedCategoryContent,
     SuggestedCategoryContent,
-    EndConversationContent
+    EndConversationContent,
+    ResponseSelectedContent
   }
 })
 

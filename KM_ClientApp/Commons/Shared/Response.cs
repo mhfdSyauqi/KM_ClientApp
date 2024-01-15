@@ -38,5 +38,8 @@ public class Data
 
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public ReferenceCategoriesResponse? Reference_Categories { get; set; }
+
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public ReAskedResponse? ReAsked { get; set; }
 }
 

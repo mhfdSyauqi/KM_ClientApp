@@ -67,3 +67,15 @@ export async function SuggestCategoriesAsync(nextPage = 1) {
     categories: data.value?.data.suggested_categories
   }
 }
+
+export async function ReAskedCategoryStatus(categoryId) {
+  const PAYLOAD = JSON.stringify({
+    Category_Id: categoryId
+  })
+
+  const { statusCode, data } = await useMyFetch(`category/reasked`).post(PAYLOAD).json()
+  return {
+    is_success: statusCode.value === 200,
+    count: data.value?.data.reasked.count ?? 0
+  }
+}

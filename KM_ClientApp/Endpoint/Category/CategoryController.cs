@@ -65,4 +65,17 @@ public class CategoryController : MyAPIController
 
         return result.IsSuccess ? Ok(result.CreateResponseObject()) : NotFound(result.Error);
     }
+
+    [HttpPost]
+    [Route("reasked")]
+    public async Task<IActionResult> ReAskedCategories([FromBody] ReAskedRequest request, CancellationToken cancellationToken)
+    {
+        string computerName = User.Identity?.Name ?? "Error\\NotAuthUser";
+        request.Create_By = computerName.Split("\\")[1];
+
+        var query = new ReAskedCategoryQuery(request);
+        var result = await Sender.Send(query, cancellationToken);
+
+        return result.IsSuccess ? Ok(result.CreateResponseObject()) : NotFound();
+    }
 }

@@ -52,49 +52,68 @@ async function GoMainMenu() {
 </script>
 
 <template>
-  <div
-    class="flex justify-start items-end"
-    v-if="!props.record.selected && !props.record.is_closed"
-  >
-    <div class="basis-[12%]">&nbsp;</div>
-    <ul class="basis-[70%] flex flex-row flex-wrap items-start gap-2 mr-7">
-      <li
-        v-for="category in props.record.items"
-        :key="category.id"
-        @click="SelectedCategory(category)"
-      >
-        <ButtonCategory>
-          {{ category.name }}
-        </ButtonCategory>
-      </li>
+  <template v-if="!props.record.is_closed && !props.record.is_reasked && !props.record.selected">
+    <div class="flex justify-start items-end">
+      <div class="basis-[12%]">&nbsp;</div>
+      <ul class="basis-[70%] flex flex-row flex-wrap items-start gap-2 mr-7">
+        <li
+          v-for="category in props.record.items"
+          :key="category.id"
+          @click="SelectedCategory(category)"
+        >
+          <ButtonCategory>
+            {{ category.name }}
+          </ButtonCategory>
+        </li>
 
-      <li v-if="nextPage !== null">
-        <ButtonCategory @click.prevent="LoadMore">More...</ButtonCategory>
-      </li>
-      <li v-if="currLayer >= 2 || currPage > 1">
-        <ButtonCategory @click.prevent="GoBack">Go Back</ButtonCategory>
-      </li>
-      <li v-if="currLayer > 1 || !isCommon">
-        <ButtonCategory @click.prevent="GoMainMenu">Go Main Menu</ButtonCategory>
-      </li>
-    </ul>
-  </div>
+        <li v-if="nextPage !== null">
+          <ButtonCategory @click.prevent="LoadMore">More...</ButtonCategory>
+        </li>
+        <li v-if="currLayer >= 2 || currPage > 1">
+          <ButtonCategory @click.prevent="GoBack">Go Back</ButtonCategory>
+        </li>
+        <li v-if="currLayer > 1 || !isCommon">
+          <ButtonCategory @click.prevent="GoMainMenu">Go Main Menu</ButtonCategory>
+        </li>
+      </ul>
+    </div>
+  </template>
 
-  <div class="flex justify-start items-end" v-if="!props.record.selected && props.record.is_closed">
-    <div class="basis-[12%]">&nbsp;</div>
-    <ul class="basis-[70%] flex flex-row flex-wrap items-start gap-2 mr-7">
-      <li>
-        <ButtonCategory @click.prevent="contentStore.SuggestedCategoryContent('Ya', 1)">
-          Ya
-        </ButtonCategory>
-      </li>
-      <li>
-        <ButtonCategory @click.prevent="contentStore.EndConversationContent()">
-          Tidak
-        </ButtonCategory>
-      </li>
-    </ul>
-  </div>
+  <template v-if="props.record.is_closed && !props.record.selected">
+    <div class="flex justify-start items-end">
+      <div class="basis-[12%]">&nbsp;</div>
+      <ul class="basis-[70%] flex flex-row flex-wrap items-start gap-2 mr-7">
+        <li>
+          <ButtonCategory @click.prevent="contentStore.SuggestedCategoryContent('Yes', 1)">
+            Yes
+          </ButtonCategory>
+        </li>
+        <li>
+          <ButtonCategory @click.prevent="contentStore.EndConversationContent()">
+            No
+          </ButtonCategory>
+        </li>
+      </ul>
+    </div>
+  </template>
+
+  <template v-if="props.record.is_reasked && !props.record.selected">
+    <div class="flex justify-start items-end">
+      <div class="basis-[12%]">&nbsp;</div>
+      <ul class="basis-[70%] flex flex-row flex-wrap items-start gap-2 mr-7">
+        <li>
+          <ButtonCategory @click.prevent="contentStore.ResponseSelectedContent(currSearchedId)">
+            Yes
+          </ButtonCategory>
+        </li>
+        <li>
+          <ButtonCategory @click.prevent="contentStore.SuggestedCategoryContent('No', 1)">
+            No
+          </ButtonCategory>
+        </li>
+      </ul>
+    </div>
+  </template>
 </template>
 
 <style scoped></style>
