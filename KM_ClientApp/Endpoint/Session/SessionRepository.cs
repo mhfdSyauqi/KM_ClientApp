@@ -84,7 +84,7 @@ public class SessionRepository : ISessionRepository
     {
         using var connection = await _connection.CreateConnectionAsync();
 
-        string storedProcedureName = "[dbo].[Patch_User_Active_Session]";
+        string storedProcedureName = "[dbo].[Patch_User_Session]";
 
         PatchSession patchedSession = new()
         {

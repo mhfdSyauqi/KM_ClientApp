@@ -5,9 +5,11 @@ import { useSessionStore } from '@/stores/session.js'
 import { acceptHMRUpdate, defineStore } from 'pinia'
 import { useTimeout, promiseTimeout } from '@vueuse/core'
 import { ref } from 'vue'
+import { useContentStore } from '@/stores/content.js'
 
 export const useFeedbackStore = defineStore('feedback', () => {
   const sessionStore = useSessionStore()
+  const contentStore = useContentStore()
 
   const windowOption = ref({
     isOpen: false,
@@ -89,7 +91,9 @@ export const useFeedbackStore = defineStore('feedback', () => {
         windowOption.value.isSending = false
 
         if (statusCode.value === 204) {
-          sessionStore.userSession.has_feedback = true
+          await contentStore.FeedbackContent().then(() => {
+            sessionStore.userSession.has_feedback = true
+          })
         }
       }
     }

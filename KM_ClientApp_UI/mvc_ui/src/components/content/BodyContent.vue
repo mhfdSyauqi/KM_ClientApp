@@ -5,6 +5,7 @@ import BotError from '@/components/body/BotError.vue'
 import BotMessage from '@/components/body/BotMessage.vue'
 import BotTyping from '@/components/body/BotTyping.vue'
 import UserMessage from '@/components/body/UserMessage.vue'
+import BotEndMarker from '@/components/body/BotEndMarker.vue'
 
 import BotCategories from '@/shared/botCategories'
 import BotResponseContent from '@/shared/botContent.js'
@@ -59,6 +60,10 @@ onUpdated(async () => {
         <BotError v-else />
       </template>
     </template>
+
+    <BotEndMarker
+      v-show="!sessionStore.userSession.is_active && sessionStore.userSession.has_feedback"
+    />
 
     <span ref="scrollPosition">
       <br />

@@ -323,6 +323,13 @@ export const useContentStore = defineStore('content', () => {
     return await sessionStore.sessionHandler.end(endedBy)
   }
 
+  async function FeedbackContent() {
+    const messageResponse = await GetMessageByTypeAsync(MessageType.feedback)
+    if (messageResponse.is_success) {
+      return await Render.Message(messageResponse.messages)
+    }
+  }
+
   async function ReAskedSelectedContent(contentId, contentName) {
     const messageResponse = await GetMessageByTypeAsync(MessageType.reasked, contentName)
     if (!messageResponse.is_success) {
@@ -330,6 +337,24 @@ export const useContentStore = defineStore('content', () => {
     }
 
     return await Render.ReAsked(contentId, messageResponse.messages)
+  }
+
+  async function ReAskedContent(contentId) {
+    await sessionStore.recordHandler.markSelectedCategory()
+    await sessionStore.recordHandler.addUserMessage(null, 'Yes')
+
+    return await ResponseSelectedContent(contentId)
+  }
+
+  async function EndingReAskedContent() {
+    const messageResponse = await GetMessageByTypeAsync(MessageType.solved)
+    if (!messageResponse.is_success) {
+      return await ShowErrorContent()
+    }
+    sessionStore.recordHandler.addUserMessage(null, 'No')
+    sessionStore.recordHandler.markSelectedCategory()
+
+    return await Render.Ending(messageResponse.messages)
   }
 
   const Render = {
@@ -387,7 +412,6 @@ export const useContentStore = defineStore('content', () => {
       await sessionStore.sessionHandler.update()
     },
     ReAsked: async (contentId, reAskedMessages) => {
-      reAskedMessages?.map((msg) => (msg.type = 'message'))
       for (let i = 0; i <= reAskedMessages.length - 1; i++) {
         const ready = useTimeout(delayTyping)
         const message = reAskedMessages[i]
@@ -399,6 +423,20 @@ export const useContentStore = defineStore('content', () => {
       }
 
       sessionStore.recordHandler.addBotCategory({ is_reasked: true, searched_identity: contentId })
+      await sessionStore.sessionHandler.update()
+    },
+    Ending: async (endMessage) => {
+      for (let i = 0; i <= endMessage.length - 1; i++) {
+        const ready = useTimeout(delayTyping * i)
+        const message = endMessage[i]
+        sessionStore.recordHandler.addBotMessage(message)
+        await promiseTimeout(delayTyping)
+        if (ready.value) {
+          sessionStore.recordHandler.markAsRendered()
+        }
+      }
+
+      sessionStore.recordHandler.addBotCategory({ is_closed: true })
       await sessionStore.sessionHandler.update()
     }
   }
@@ -413,7 +451,9 @@ export const useContentStore = defineStore('content', () => {
     SearchedCategoryContent,
     SuggestedCategoryContent,
     EndConversationContent,
-    ResponseSelectedContent
+    FeedbackContent,
+    ReAskedContent,
+    EndingReAskedContent
   }
 })
 

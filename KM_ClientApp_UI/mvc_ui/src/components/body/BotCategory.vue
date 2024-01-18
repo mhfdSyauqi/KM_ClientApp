@@ -102,14 +102,12 @@ async function GoMainMenu() {
       <div class="basis-[12%]">&nbsp;</div>
       <ul class="basis-[70%] flex flex-row flex-wrap items-start gap-2 mr-7">
         <li>
-          <ButtonCategory @click.prevent="contentStore.ResponseSelectedContent(currSearchedId)">
+          <ButtonCategory @click.prevent="contentStore.ReAskedContent(currSearchedId)">
             Yes
           </ButtonCategory>
         </li>
         <li>
-          <ButtonCategory @click.prevent="contentStore.SuggestedCategoryContent('No', 1)">
-            No
-          </ButtonCategory>
+          <ButtonCategory @click.prevent="contentStore.EndingReAskedContent()"> No </ButtonCategory>
         </li>
       </ul>
     </div>
