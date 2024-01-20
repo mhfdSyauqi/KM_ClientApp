@@ -13,12 +13,15 @@ import BotRecord from '@/shared/botRecord'
 import UserRecord from '@/shared/userRecord'
 
 import { useContentStore } from '@/stores/content'
+import { useIdleStore } from '@/stores/idle.js'
 import { useSessionStore } from '@/stores/session'
 
-import { onMounted, onUpdated, ref } from 'vue'
+import { nextTick, onMounted, onUpdated, ref, watch } from 'vue'
+import { useIdle } from '@vueuse/core'
 
 const sessionStore = useSessionStore()
 const contentStore = useContentStore()
+const idleStore = useIdleStore()
 const scrollPosition = ref(null)
 
 onMounted(async () => {
@@ -26,6 +29,23 @@ onMounted(async () => {
   if (sessionStore.userSession.records.length === 0) {
     await contentStore.StartUpContent()
   }
+
+  const { idle, reset, lastActive } = useIdle(idleStore.Props.duration, {
+    events: ['click', 'input', 'scroll']
+  })
+  await nextTick()
+
+  watch([idle, lastActive], async ([currIdle, currLastAct], [, prevLastAct]) => {
+    if (sessionStore.userSession.is_active) {
+      if (!currIdle && currLastAct !== prevLastAct) {
+        idleStore.Props.$reset()
+      }
+
+      if (currIdle && idleStore.Props.attempt >= 0) {
+        await idleStore.IdleHandler(idleStore.Props.attempt, reset)
+      }
+    }
+  })
 })
 
 onUpdated(async () => {

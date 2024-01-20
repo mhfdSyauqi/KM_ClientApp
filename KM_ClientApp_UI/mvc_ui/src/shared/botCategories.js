@@ -10,6 +10,7 @@ class BotCategories {
     this.time = categories.time
     this.is_closed = categories.is_closed
     this.is_reasked = categories.is_reasked
+    this.is_idle = categories.is_idle
   }
 }
 

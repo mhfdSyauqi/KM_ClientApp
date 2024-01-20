@@ -10,13 +10,13 @@ import { useConfigStore } from '@/stores/config'
 import { onBeforeMount, ref } from 'vue'
 
 const configStore = useConfigStore()
-const isLoaded = ref(true)
+const isLoaded = ref(false)
 
 onBeforeMount(async () => {
   await configStore.InitAppConfigAsync()
 
-  if (configStore.appConfig === null) {
-    isLoaded.value = !isLoaded.value
+  if (configStore.appConfig !== null) {
+    isLoaded.value = true
   }
 })
 </script>

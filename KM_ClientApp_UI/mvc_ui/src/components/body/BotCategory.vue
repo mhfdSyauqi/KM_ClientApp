@@ -52,7 +52,14 @@ async function GoMainMenu() {
 </script>
 
 <template>
-  <template v-if="!props.record.is_closed && !props.record.is_reasked && !props.record.selected">
+  <template
+    v-if="
+      !props.record.is_closed &&
+      !props.record.is_reasked &&
+      !props.record.is_idle &&
+      !props.record.selected
+    "
+  >
     <div class="flex justify-start items-end">
       <div class="basis-[12%]">&nbsp;</div>
       <ul class="basis-[70%] flex flex-row flex-wrap items-start gap-2 mr-7">
@@ -79,7 +86,7 @@ async function GoMainMenu() {
     </div>
   </template>
 
-  <template v-if="props.record.is_closed && !props.record.selected">
+  <template v-if="props.record.is_closed || (props.record.is_idle && !props.record.selected)">
     <div class="flex justify-start items-end">
       <div class="basis-[12%]">&nbsp;</div>
       <ul class="basis-[70%] flex flex-row flex-wrap items-start gap-2 mr-7">
