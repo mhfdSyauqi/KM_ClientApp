@@ -4,6 +4,7 @@ using KM_ClientApp.Commons.Policy;
 using KM_ClientApp.Endpoint.Category;
 using KM_ClientApp.Endpoint.Config;
 using KM_ClientApp.Endpoint.Content;
+using KM_ClientApp.Endpoint.Email;
 using KM_ClientApp.Endpoint.Feedback;
 using KM_ClientApp.Endpoint.Message;
 using KM_ClientApp.Endpoint.Session;
@@ -39,7 +40,7 @@ builder.Services.AddAuthorization(options =>
 
 builder.Services.AddCors(options =>
     options.AddPolicy("local", cfg =>
-        cfg.WithOrigins("http://localhost:5173")
+        cfg.WithOrigins("http://localhost:5173", "http://localhost:2020/")
             .AllowCredentials()
             .AllowAnyHeader()
             .AllowAnyMethod()
@@ -60,6 +61,7 @@ builder.Services.AddScoped<IMessageRepository, MessageRepository>();
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<IContentRepository, ContentRepository>();
 builder.Services.AddScoped<IFeedbackRepository, FeedbackRepository>();
+builder.Services.AddScoped<IEmailRepository, EmailRepository>();
 
 
 builder.Services.AddTransient<ErrorExceptionMiddleware>();

@@ -21,15 +21,11 @@ public class ConfigRepository : IConfigRepository
                SELECT 
                     [APP_NAME],
                     [APP_IMAGE],
-                    [MAIL_HISTORY],
                     [DELAY_TYPING],
                     [IDLE_ATTEMPT],
                     [IDLE_DURATION]
                 FROM 
-                    View_Configuration_Type_Number as BN
-                INNER JOIN
-                    View_Configuration_Type_Text as BT 
-                On BT.Config = BN.Config
+                    [dbo].[View_Configuration_App]
         ";
 
         var command = new CommandDefinition(query, cancellationToken);

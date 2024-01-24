@@ -32,8 +32,7 @@ public class GetConfigurationHandler : IQueryHandler<GetConfigurationQuery, Conf
             App_Name = config.App_Name,
             Delay_Typing = config.Delay_Typing,
             Idle_Attempt = config.Idle_Attempt,
-            Idle_Duration = config.Idle_Duration,
-            Mail_History = config.Mail_History
+            Idle_Duration = config.Idle_Duration
         };
 
         return Result.Success(response);
