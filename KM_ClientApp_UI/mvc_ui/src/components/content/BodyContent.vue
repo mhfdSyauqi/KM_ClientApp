@@ -52,6 +52,22 @@ onMounted(async () => {
 onUpdated(async () => {
   scrollPosition.value.scrollIntoView({ behavior: 'smooth' })
 })
+
+function BotRecordProp(time, message) {
+  return new BotRecord(time, message)
+}
+
+function BotCategoryProp(categories) {
+  return new BotCategories(categories)
+}
+
+function BotResponseProp(content) {
+  return new BotResponseContent(content)
+}
+
+function UserRecordProp(time, message) {
+  return new UserRecord(time, message)
+}
 </script>
 
 <template>
@@ -60,20 +76,20 @@ onUpdated(async () => {
     <template v-for="item in sessionStore.userSession.records" :key="item.time">
       <template v-if="item.actor === 'bot' && item.message">
         <BotTyping v-if="!item.rendered" />
-        <BotMessage v-else :record="new BotRecord(item.time, item.message)" />
+        <BotMessage v-else :record="BotRecordProp(item.time, item.message)" />
       </template>
 
       <template v-if="item.actor === 'bot' && item.categories">
-        <BotCategory :record="new BotCategories(item.categories)" />
+        <BotCategory :record="BotCategoryProp(item.categories)" />
       </template>
 
       <template v-if="item.actor === 'bot' && item.content">
         <BotTyping v-if="!item.rendered" />
-        <BotContent v-else :record="new BotResponseContent(item.content)" />
+        <BotContent v-else :record="BotResponseProp(item.content)" />
       </template>
 
       <template v-if="item.actor === 'user'">
-        <UserMessage :record="new UserRecord(item.time, item.message.text)" />
+        <UserMessage :record="new UserRecordProp(item.time, item.message.text)" />
       </template>
 
       <template v-if="item.actor === 'error'">
