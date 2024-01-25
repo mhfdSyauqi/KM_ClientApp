@@ -24,15 +24,16 @@ const contentStore = useContentStore()
 const idleStore = useIdleStore()
 const scrollPosition = ref(null)
 
+const { idle, reset, lastActive } = useIdle(idleStore.Props.duration, {
+  events: ['click', 'input', 'unload']
+})
+
 onMounted(async () => {
   await sessionStore.sessionHandler.get()
   if (sessionStore.userSession.records.length === 0) {
     await contentStore.StartUpContent()
   }
 
-  const { idle, reset, lastActive } = useIdle(idleStore.Props.duration, {
-    events: ['click', 'input', 'scroll']
-  })
   await nextTick()
 
   watch([idle, lastActive], async ([currIdle, currLastAct], [, prevLastAct]) => {

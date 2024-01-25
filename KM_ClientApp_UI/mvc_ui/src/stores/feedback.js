@@ -3,7 +3,7 @@ import { useMyFetch } from '@/shared/useMyFetch.js'
 import { useSessionStore } from '@/stores/session.js'
 
 import { acceptHMRUpdate, defineStore } from 'pinia'
-import { useTimeout, promiseTimeout } from '@vueuse/core'
+import { useTimeout, promiseTimeout, useArrayMap } from '@vueuse/core'
 import { ref } from 'vue'
 import { useContentStore } from '@/stores/content.js'
 
@@ -91,12 +91,51 @@ export const useFeedbackStore = defineStore('feedback', () => {
         windowOption.value.isSending = false
 
         if (statusCode.value === 204) {
-          await contentStore.FeedbackContent().then(() => {
+          await contentStore.FeedbackContent().then(async () => {
             sessionStore.userSession.has_feedback = true
+            await SendMailHistory()
           })
         }
       }
     }
+  }
+
+  async function SendMailHistory() {
+    const records = useArrayMap(sessionStore.userSession.records, (item) => {
+      if (item.actor === 'bot' && item.message) {
+        return {
+          Actor: item.actor,
+          Time: item.time,
+          Message: item.message.text,
+          Content: null,
+          Link: null
+        }
+      }
+      if (item.actor === 'bot' && item.content) {
+        return {
+          Actor: 'content',
+          Time: item.time,
+          Message: item.content.message?.text,
+          Content: item.content.description,
+          Link: item.content.id
+        }
+      }
+      if (item.actor === 'user') {
+        return {
+          Actor: item.actor,
+          Time: item.time,
+          Message: item.message?.text,
+          Content: null,
+          Link: null
+        }
+      }
+    })
+
+    const PAYLOAD = JSON.stringify({
+      Histories: records.value
+    })
+
+    await useMyFetch('email').post(PAYLOAD).json()
   }
 
   return { windowOption, rating, remark, ratingStars, SendFeedback }

@@ -1,3 +1,5 @@
+import audio from '@/assets/message.mp3'
+
 import { useMyFetch } from '@/shared/useMyFetch'
 
 import { acceptHMRUpdate, defineStore } from 'pinia'
@@ -5,6 +7,10 @@ import { ref } from 'vue'
 
 export const useConfigStore = defineStore('config', () => {
   const appConfig = ref(null)
+  const appAudio = ref({
+    element: null,
+    source: audio
+  })
 
   async function InitAppConfigAsync() {
     const { data } = await useMyFetch('config').get().json()
@@ -13,7 +19,7 @@ export const useConfigStore = defineStore('config', () => {
     }
   }
 
-  return { appConfig, InitAppConfigAsync }
+  return { appConfig, appAudio, InitAppConfigAsync }
 })
 
 if (import.meta.hot) {

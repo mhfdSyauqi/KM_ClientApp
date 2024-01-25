@@ -85,13 +85,13 @@ function onRated(rating) {
 
       <div class="flex justify-end gap-3">
         <button
-          class="w-1/5 bg-transparent p-2 text-red-700 font-medium rounded-xl cursor-pointer hover:bg-red-700 hover:text-white active:scale-95 max-sm:w-1/2 max-sm:bg-red-700 max-sm:text-white"
+          class="w-1/5 bg-transparent py-2 text-red-700 font-medium rounded-xl hover:bg-red-700 hover:text-white active:scale-95 max-sm:w-1/2 max-sm:bg-red-700 max-sm:text-white text-center"
           @click="feedbackStore.windowOption.isOpen = false"
         >
           Cancel
         </button>
         <button
-          class="w-1/5 bg-primary hover:bg-green-800 rounded-xl p-2 drop-shadow-md text-white cursor-pointer active:scale-95 max-sm:w-1/2"
+          class="w-1/5 bg-primary py-2 text-white hover:bg-green-800 rounded-xl drop-shadow-md active:scale-95 max-sm:w-1/2"
           @click.prevent="feedbackStore.SendFeedback"
         >
           Send

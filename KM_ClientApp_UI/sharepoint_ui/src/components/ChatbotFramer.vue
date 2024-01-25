@@ -3,16 +3,24 @@ import IconClose from '@components/icon/IconClose.vue'
 
 import { useConfigStore } from '@stores/config'
 
-import { onMounted, ref } from 'vue'
+import { onMounted, ref, watch } from 'vue'
 
 const configStore = useConfigStore()
 const iframe = ref(null)
 
 onMounted(() => {
-  iframe.value.src = 'http://localhost:5173'
+  watch(
+    configStore.windowInfo,
+    (current) => {
+      if (current.isOpen && iframe.value.src === 'about:blank') {
+        iframe.value.src = 'http://localhost:5173'
 
-  // Implement This Later
-  // await RenderIframe()
+        // Implement This Later
+        // await RenderIframe()
+      }
+    },
+    { deep: true }
+  )
 })
 
 async function RenderIframe() {

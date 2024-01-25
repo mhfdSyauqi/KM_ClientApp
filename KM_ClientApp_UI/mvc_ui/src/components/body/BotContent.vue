@@ -49,9 +49,9 @@ function LoadAlterNative(e) {
         <br />
         <small>todo : update artile link</small>
         <br />
-        <a class="text-primary visited:text-gray-500" :href="botLink" target="_blank"
-          ><i>Read More...</i></a
-        >
+        <a class="text-primary visited:text-gray-500" :href="botLink" target="_blank">
+          <i>Read More...</i>
+        </a>
       </div>
 
       <p class="text-right text-xs text-gray-500">{{ botSendAt }}</p>

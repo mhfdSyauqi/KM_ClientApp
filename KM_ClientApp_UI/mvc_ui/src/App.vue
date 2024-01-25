@@ -11,6 +11,7 @@ import { onBeforeMount, ref } from 'vue'
 
 const configStore = useConfigStore()
 const isLoaded = ref(false)
+const audioElement = ref(null)
 
 onBeforeMount(async () => {
   await configStore.InitAppConfigAsync()
@@ -18,6 +19,7 @@ onBeforeMount(async () => {
   if (configStore.appConfig !== null) {
     isLoaded.value = true
   }
+  configStore.appAudio.element = audioElement.value
 })
 </script>
 
@@ -37,6 +39,8 @@ onBeforeMount(async () => {
   </BaseLayout>
 
   <ErrorLayout v-else />
+
+  <audio :src="configStore.appAudio.source" ref="audioElement"></audio>
 </template>
 
 <style scoped></style>

@@ -1,11 +1,15 @@
 import { useMyFetch } from '@/shared/useMyFetch'
+
 import { useContentStore } from '@/stores/content'
-import { useArrayFilter } from '@vueuse/core'
+import { useConfigStore } from '@/stores/config.js'
+
 import { acceptHMRUpdate, defineStore } from 'pinia'
+import { useArrayFilter } from '@vueuse/core'
 import { ref } from 'vue'
 
 export const useSessionStore = defineStore('session', () => {
   const contentStore = useContentStore()
+  const configStore = useConfigStore()
 
   const userSession = ref({
     id: null,
@@ -135,6 +139,8 @@ export const useSessionStore = defineStore('session', () => {
           record.rendered = !record.selected
         }
       })
+      configStore.appAudio.element.currentTime = 0
+      configStore.appAudio.element.play()
     }
   }
 

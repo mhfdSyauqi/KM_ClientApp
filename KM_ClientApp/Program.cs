@@ -40,7 +40,7 @@ builder.Services.AddAuthorization(options =>
 
 builder.Services.AddCors(options =>
     options.AddPolicy("local", cfg =>
-        cfg.WithOrigins("http://localhost:5173", "http://localhost:2020/")
+        cfg.WithOrigins("http://localhost:5173", "http://localhost:2020")
             .AllowCredentials()
             .AllowAnyHeader()
             .AllowAnyMethod()

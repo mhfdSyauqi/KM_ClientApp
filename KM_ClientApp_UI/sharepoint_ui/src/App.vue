@@ -15,8 +15,8 @@ onBeforeMount(async () => {
 
 <template>
   <div class="select-none">
-    <ChatbotBubble v-if="!configStore.windowInfo.isOpen" />
-    <ChatbotFramer v-else />
+    <ChatbotBubble v-show="!configStore.windowInfo.isOpen" />
+    <ChatbotFramer v-show="configStore.windowInfo.isOpen" />
   </div>
 </template>
 
