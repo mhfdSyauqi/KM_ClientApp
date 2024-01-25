@@ -8,29 +8,17 @@ import { onMounted, ref, watch } from 'vue'
 const configStore = useConfigStore()
 const iframe = ref(null)
 
-onMounted(() => {
+onMounted(async () => {
   watch(
     configStore.windowInfo,
     (current) => {
       if (current.isOpen && iframe.value.src === 'about:blank') {
-        iframe.value.src = 'http://localhost:5173'
-
-        // Implement This Later
-        // await RenderIframe()
+        iframe.value.src = 'https://localhost:44356/'
       }
     },
     { deep: true }
   )
 })
-
-async function RenderIframe() {
-  const apiOption = await fetch('http://localhost:5173', {
-    method: 'GET',
-    credentials: 'include'
-  })
-
-  iframe.value.contentDocument.write('<h1>Hello World</h1>')
-}
 </script>
 
 <template>
@@ -39,8 +27,8 @@ async function RenderIframe() {
   >
     <iframe ref="iframe" src="about:blank"></iframe>
 
-    <a class="cursor-pointer absolute right-8 top-5" @click="configStore.windowInfo.toggle">
-      <IconClose class="fill-gray-950" />
+    <a class="cursor-pointer absolute right-8 top-6" @click="configStore.windowInfo.toggle">
+      <IconClose class="fill-white" />
     </a>
   </div>
 </template>
