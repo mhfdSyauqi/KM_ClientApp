@@ -89,10 +89,10 @@ async function UserSubmit() {
 </script>
 
 <template>
-  <div class="ml-9 mt-5 rounded-lg flex drop-shadow-md group bg-transparent">
+  <div class="mx-5 mt-4 lg:mx-9 rounded-lg flex drop-shadow-md group bg-transparent">
     <p
       ref="infoEl"
-      class="absolute -top-7 lg:-top-5 left-1 text-xs lg:text-sm"
+      class="absolute -top-3.5 max-lg:-top-5 left-1 text-xs max-lg:text-sm"
       :class="[
         { hidden: !showInformation },
         { 'text-primary animate-bounce': contentStore.isFocused },
@@ -107,13 +107,13 @@ async function UserSubmit() {
       v-model="searchInput"
       @input="CheckUserInput"
       @keydown.enter.prevent="UserSubmit"
-      class="w-[85%] rounded-l-lg py-2 px-3 border-2 border-r-0 resize-none focus:outline-none focus:border-lime-300 placeholder:italic placeholder:text-sm"
+      class="w-[95%] max-lg:w-[85%] rounded-l-lg p-1 md:p-1.5 max-lg:py-2 max-lg:px-3 border-2 border-r-0 resize-none focus:outline-none focus:border-lime-300 placeholder:italic placeholder:text-sm"
       placeholder="Insert keyword....."
       rows="1"
     ></textarea>
     <button
       @click="UserSubmit"
-      class="w-[10%] bg-primary rounded-r-md flex justify-center items-center drop-shadow-md"
+      class="w-[15%] max-lg:w-[10%] bg-primary rounded-r-md flex justify-center items-center drop-shadow-md"
     >
       <IconSend class="fill-white" />
     </button>

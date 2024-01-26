@@ -5,9 +5,9 @@ async function StartNewSession() {
 </script>
 
 <template>
-  <div class="mx-9 mt-8 md:mt-6 lg:mt-5 drop-shadow-md bg-transparent">
+  <div class="mx-5 mt-4 lg:mx-9 drop-shadow-md bg-transparent">
     <button
-      class="w-full bg-primary hover:bg-green-800 rounded-xl p-3 drop-shadow-md text-white cursor-pointer active:scale-95"
+      class="w-full bg-primary hover:bg-green-800 rounded-xl p-1.5 xl:p-3 drop-shadow-md text-white cursor-pointer active:scale-95"
       @click.prevent="StartNewSession"
     >
       Start New Conversation

@@ -10,10 +10,10 @@ function LoadAlterNative(e) {
 </script>
 
 <template>
-  <div class="h-full bg-primary px-9 flex justify-start justify-items-center items-center">
+  <div class="h-full bg-primary gap-2.5 px-9 flex justify-start justify-items-center items-center">
     <div class="basis-[12%]">
       <img
-        class="w-[60%] h-[60%] rounded-full"
+        class="sm:w-[55%] sm:h-[55%] lg:w-[80%] lg:h-[80%] rounded-full"
         @error.prevent="LoadAlterNative"
         :src="configStore.appConfig?.app_image"
       />

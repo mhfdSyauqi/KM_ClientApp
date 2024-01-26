@@ -27,7 +27,10 @@ onMounted(async () => {
   >
     <iframe ref="iframe" src="about:blank"></iframe>
 
-    <a class="cursor-pointer absolute right-8 top-6" @click="configStore.windowInfo.toggle">
+    <a
+      class="cursor-pointer absolute right-8 top-4 xl:top-6"
+      @click="configStore.windowInfo.toggle"
+    >
       <IconClose class="fill-white" />
     </a>
   </div>

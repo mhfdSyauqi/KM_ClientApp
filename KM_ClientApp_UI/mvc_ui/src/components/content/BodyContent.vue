@@ -1,11 +1,11 @@
 <script setup>
 import BotCategory from '@/components/body/BotCategory.vue'
 import BotContent from '@/components/body/BotContent.vue'
+import BotEndMarker from '@/components/body/BotEndMarker.vue'
 import BotError from '@/components/body/BotError.vue'
 import BotMessage from '@/components/body/BotMessage.vue'
 import BotTyping from '@/components/body/BotTyping.vue'
 import UserMessage from '@/components/body/UserMessage.vue'
-import BotEndMarker from '@/components/body/BotEndMarker.vue'
 
 import BotCategories from '@/shared/botCategories'
 import BotResponseContent from '@/shared/botContent.js'
@@ -16,8 +16,8 @@ import { useContentStore } from '@/stores/content'
 import { useIdleStore } from '@/stores/idle.js'
 import { useSessionStore } from '@/stores/session'
 
-import { nextTick, onMounted, onUpdated, ref, watch } from 'vue'
 import { useIdle } from '@vueuse/core'
+import { nextTick, onMounted, onUpdated, ref, watch } from 'vue'
 
 const sessionStore = useSessionStore()
 const contentStore = useContentStore()
