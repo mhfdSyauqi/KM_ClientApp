@@ -10,8 +10,8 @@ export const useConfigStore = defineStore('config', () => {
   })
 
   const appConfig = reactive({
-    app_name: null,
-    app_image: null
+    app_name: 'Chat Bot',
+    app_image: ''
   })
 
   async function InitAppConfig() {

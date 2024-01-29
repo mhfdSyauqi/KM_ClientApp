@@ -89,34 +89,38 @@ async function UserSubmit() {
 </script>
 
 <template>
-  <div class="mx-5 mt-4 lg:mx-9 rounded-lg flex drop-shadow-md group bg-transparent">
-    <p
-      ref="infoEl"
-      class="absolute -top-3.5 max-lg:-top-5 left-1 text-xs max-lg:text-sm"
-      :class="[
-        { hidden: !showInformation },
-        { 'text-primary animate-bounce': contentStore.isFocused },
-        { 'text-red-500 animate-bounce': showError }
-      ]"
+  <div class="w-full h-full flex">
+    <div
+      class="basis-full my-auto mx-5 lg:mx-9 rounded-lg flex drop-shadow-md group bg-transparent"
     >
-      {{ userInformation }}
-    </p>
+      <p
+        ref="infoEl"
+        class="absolute -top-3.5 max-lg:-top-5 left-1 text-xs max-lg:text-sm"
+        :class="[
+          { hidden: !showInformation },
+          { 'text-primary animate-bounce': contentStore.isFocused },
+          { 'text-red-500 animate-bounce': showError }
+        ]"
+      >
+        {{ userInformation }}
+      </p>
 
-    <textarea
-      ref="searchEl"
-      v-model="searchInput"
-      @input="CheckUserInput"
-      @keydown.enter.prevent="UserSubmit"
-      class="w-[95%] max-lg:w-[85%] rounded-l-lg p-1 md:p-1.5 max-lg:py-2 max-lg:px-3 border-2 border-r-0 resize-none focus:outline-none focus:border-lime-300 placeholder:italic placeholder:text-sm"
-      placeholder="Insert keyword....."
-      rows="1"
-    ></textarea>
-    <button
-      @click="UserSubmit"
-      class="w-[15%] max-lg:w-[10%] bg-primary rounded-r-md flex justify-center items-center drop-shadow-md"
-    >
-      <IconSend class="fill-white" />
-    </button>
+      <textarea
+        ref="searchEl"
+        v-model="searchInput"
+        @input="CheckUserInput"
+        @keydown.enter.prevent="UserSubmit"
+        class="w-[85%] rounded-l-lg p-1 md:p-1.5 max-lg:py-2 max-lg:px-3 border-2 border-r-0 resize-none focus:outline-none focus:border-lime-300 placeholder:italic placeholder:text-sm"
+        placeholder="Insert keyword....."
+        rows="1"
+      ></textarea>
+      <button
+        @click="UserSubmit"
+        class="w-[15%] bg-primary rounded-r-md flex justify-center items-center drop-shadow-md"
+      >
+        <IconSend class="fill-white" />
+      </button>
+    </div>
   </div>
 </template>
 
