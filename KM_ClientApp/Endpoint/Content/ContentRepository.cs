@@ -21,7 +21,7 @@ public class ContentRepository : IContentRepository
         string query = @"
                SELECT
 	                [uid],
-	                [description]
+	                [description] = [description_html]
                 FROM
 	                [dbo].[Bot_Content]
                 WHERE
