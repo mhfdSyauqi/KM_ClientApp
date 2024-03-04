@@ -231,6 +231,8 @@ export const useContentStore = defineStore('content', () => {
       return await NotFoundCategoryContent(searchedKeyword, pageNum)
     }
 
+    sessionStore.recordHandler.markSelectedCategory()
+
     if (categoriesResponse.is_single) {
       const contentId = categoriesResponse.categories.items[0].id
       const message = messageResponse.messages
@@ -245,7 +247,6 @@ export const useContentStore = defineStore('content', () => {
       return await SingleResponseContent(contentId, message)
     }
 
-    sessionStore.recordHandler.markSelectedCategory()
     return await Render.MessageWithCategory(messageResponse.messages, categoriesResponse.categories)
   }
 
