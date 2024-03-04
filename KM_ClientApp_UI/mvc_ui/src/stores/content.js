@@ -235,6 +235,13 @@ export const useContentStore = defineStore('content', () => {
       const contentId = categoriesResponse.categories.items[0].id
       const message = messageResponse.messages
 
+      const { count } = await ReAskedCategoryStatus(contentId)
+      await PostHeatSelectedCategory(sessionStore.userSession.id, searchedKeyword, contentId)
+
+      if (count > 0) {
+        return await ReAskedSelectedContent(contentId, searchedKeyword)
+      }
+
       return await SingleResponseContent(contentId, message)
     }
 

@@ -15,15 +15,13 @@ function LoadAlterNative(e) {
   >
     <div class="basis-[12%]">
       <img
-        class="w-14 rounded-full"
+        class="w-11 lg:w-13 xl:w-14 rounded-full"
         @error.prevent="LoadAlterNative"
         :src="configStore.appConfig?.app_image"
         alt="image"
       />
     </div>
-    <h1 class="basis-[83%] font-semibold text-white">
-      {{ configStore.appConfig?.app_name }}
-    </h1>
+    <h1 class="basis-[83%] font-semibold text-white">{{ configStore.appConfig?.app_name }}s</h1>
   </div>
 </template>
 

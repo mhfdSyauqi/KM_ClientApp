@@ -30,6 +30,7 @@ public class GetConfigurationHandler : IQueryHandler<GetConfigurationQuery, Conf
         {
             App_Image = config.App_Image,
             App_Name = config.App_Name,
+            Article_Link = config.Article_Link,
             Delay_Typing = config.Delay_Typing,
             Idle_Attempt = config.Idle_Attempt,
             Idle_Duration = config.Idle_Duration
