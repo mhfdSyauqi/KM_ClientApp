@@ -81,10 +81,10 @@ async function UserSubmit() {
 
   ToggleShowError('off')
   ToggleShowInformation('off')
-  return await contentStore.SearchedCategoryContent(searchInput.value).then(() => {
-    userInformation.value = ''
-    searchInput.value = ''
-  })
+  const searchKeyword = searchInput.value
+  searchInput.value = ''
+  userInformation.value = ''
+  await contentStore.SearchedCategoryContent(searchKeyword)
 }
 </script>
 

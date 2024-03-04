@@ -15,7 +15,7 @@ const props = defineProps({
 
 const botSendAt = useDateFormat(new Date(), 'HH:mm')
 const botContent = props.record.description
-const botLink = props.record.id
+const botLink = `${configStore.appConfig.article_link}/${props.record.id}`
 const botMessages = props.record.messages
 
 function LoadAlterNative(e) {
@@ -46,9 +46,6 @@ function LoadAlterNative(e) {
       <div class="bot-content" v-html="botContent"></div>
 
       <div>
-        <br />
-        <small>todo : update artile link</small>
-        <br />
         <a class="text-primary visited:text-gray-500" :href="botLink" target="_blank">
           <i>Read More...</i>
         </a>

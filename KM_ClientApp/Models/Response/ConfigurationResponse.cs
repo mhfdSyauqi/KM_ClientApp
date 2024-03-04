@@ -4,6 +4,7 @@ public class ConfigurationResponse
 {
     public string App_Name { get; set; } = string.Empty;
     public string App_Image { get; set; } = string.Empty;
+    public string Article_Link { get; set; } = string.Empty;
 
     public int Delay_Typing { get; set; }
     public int Idle_Duration { get; set; }

@@ -14,6 +14,7 @@ onMounted(async () => {
     (current) => {
       if (current.isOpen && iframe.value.src === 'about:blank') {
         iframe.value.src = 'https://localhost:44356/'
+        // iframe.value.src = 'http://localhost:5173/'
       }
     },
     { deep: true }
@@ -27,12 +28,16 @@ onMounted(async () => {
   >
     <iframe class="w-full h-full border-0" ref="iframe" src="about:blank"></iframe>
 
-    <a
-      class="cursor-pointer absolute right-8 top-4 xl:top-6"
-      @click="configStore.windowInfo.toggle"
+    <div
+      class="w-full absolute right-0 top-0 flex h-[11%] xl:h-[10%] justify-end items-center px-7"
     >
-      <IconClose class="fill-white" />
-    </a>
+      <a
+        class="cursor-pointer bg-transparent border-0 active:scale-95"
+        @click="configStore.windowInfo.toggle"
+      >
+        <IconClose class="fill-white" />
+      </a>
+    </div>
   </div>
 </template>
 

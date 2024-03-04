@@ -61,6 +61,11 @@ export const useFeedbackStore = defineStore('feedback', () => {
       return false
     }
 
+    if (remark.value.value === '') {
+      SetRemarkError('*Please provide your reason')
+      return false
+    }
+
     ResetError()
     return true
   }

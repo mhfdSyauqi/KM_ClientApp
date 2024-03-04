@@ -23,7 +23,8 @@ public class ConfigRepository : IConfigRepository
                     [APP_IMAGE],
                     [DELAY_TYPING],
                     [IDLE_ATTEMPT],
-                    [IDLE_DURATION]
+                    [IDLE_DURATION],
+                    [ARTICLE_LINK]
                 FROM 
                     [dbo].[View_Configuration_App]
         ";
