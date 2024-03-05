@@ -246,6 +246,7 @@ export const useContentStore = defineStore('content', () => {
 
       return await SingleResponseContent(contentId, message)
     }
+
     return await Render.MessageWithCategory(messageResponse.messages, categoriesResponse.categories)
   }
 
