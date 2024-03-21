@@ -21,7 +21,7 @@ function LoadAlterNative(e) {
         alt="image"
       />
     </div>
-    <h1 class="basis-[83%] font-semibold text-white">{{ configStore.appConfig?.app_name }}s</h1>
+    <h1 class="basis-[83%] font-semibold text-white">{{ configStore.appConfig?.app_name }}</h1>
   </div>
 </template>
 
