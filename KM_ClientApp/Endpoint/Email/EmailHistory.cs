@@ -10,64 +10,64 @@ public record EmailHistory(string LoginName, EmailHistoryRequest MailHistory) : 
 
 public class EmailHistoryHandler : INotificationHandler<EmailHistory>
 {
-    private readonly IEmailRepository _emailRepository;
+	private readonly IEmailRepository _emailRepository;
 
-    public EmailHistoryHandler(IEmailRepository emailRepository)
-    {
-        _emailRepository = emailRepository;
-    }
+	public EmailHistoryHandler(IEmailRepository emailRepository)
+	{
+		_emailRepository = emailRepository;
+	}
 
-    public async Task Handle(EmailHistory notification, CancellationToken cancellationToken)
-    {
-        var emaiLTask = _emailRepository.GetMailConfigAsync(cancellationToken);
-        var recepientTask = _emailRepository.GetMailRecepientAsync(notification.LoginName, cancellationToken);
+	public async Task Handle(EmailHistory notification, CancellationToken cancellationToken)
+	{
+		var emaiLTask = _emailRepository.GetMailConfigAsync(cancellationToken);
+		var recepientTask = _emailRepository.GetMailRecepientAsync(notification.LoginName, cancellationToken);
 
-        await Task.WhenAll(emaiLTask, recepientTask);
+		await Task.WhenAll(emaiLTask, recepientTask);
 
-        var emailConfig = await emaiLTask;
-        var recepient = await recepientTask;
+		var emailConfig = await emaiLTask;
+		var recepient = await recepientTask;
 
+		if (emailConfig != null && recepient != null && emailConfig.MAIL_HISTORY_STATUS)
+		{
+			var emailMessage = CreateEmailMessage(emailConfig, recepient, notification.MailHistory);
 
-        if (emailConfig != null && recepient != null && emailConfig.MAIL_HISTORY_STATUS)
-        {
-            var emailMessage = CreateEmailMessage(emailConfig, recepient, notification.MailHistory);
+			using var client = new SmtpClient();
+			await client.ConnectAsync(emailConfig.MAIL_CONFIG_SERVER, emailConfig.MAIL_CONFIG_PORT, MailKit.Security.SecureSocketOptions.StartTls, cancellationToken);
+			await client.AuthenticateAsync(emailConfig.MAIL_CONFIG_USERNAME, emailConfig.MAIL_CONFIG_PASSWORD, cancellationToken);
+			await client.SendAsync(emailMessage, cancellationToken);
+			await client.DisconnectAsync(true, cancellationToken);
+		}
+	}
 
-            using var client = new SmtpClient();
-            await client.ConnectAsync(emailConfig.MAIL_CONFIG_SERVER, emailConfig.MAIL_CONFIG_PORT, MailKit.Security.SecureSocketOptions.StartTls, cancellationToken);
-            await client.AuthenticateAsync(emailConfig.MAIL_CONFIG_USERNAME, emailConfig.MAIL_CONFIG_PASSWORD, cancellationToken);
-            await client.SendAsync(emailMessage, cancellationToken);
-            await client.DisconnectAsync(true, cancellationToken);
-        }
-    }
+	private static MimeMessage CreateEmailMessage(EmailHistoryConfig emailConfig, EmailHistoryRecipient recipient, EmailHistoryRequest history)
+	{
+		var message = new MimeMessage();
+		var mailboxFrom = new MailboxAddress(emailConfig.MAIL_HISTORY_FROM, emailConfig.MAIL_CONFIG_USERNAME);
+		var mailboxTo = new MailboxAddress(recipient.Full_Name, recipient.Email);
 
-    private static MimeMessage CreateEmailMessage(EmailHistoryConfig emailConfig, EmailHistoryRecipient recipient, EmailHistoryRequest history)
-    {
-        var message = new MimeMessage();
-        var mailboxFrom = new MailboxAddress(emailConfig.MAIL_HISTORY_FROM, emailConfig.MAIL_CONFIG_USERNAME);
-        var mailboxTo = new MailboxAddress(recipient.Full_Name, recipient.Email);
+		message.From.Add(mailboxFrom);
+		message.To.Add(mailboxTo);
+		message.Subject = emailConfig.MAIL_HISTORY_SUBJECT;
 
-        message.From.Add(mailboxFrom);
-        message.To.Add(mailboxTo);
-        message.Subject = emailConfig.MAIL_HISTORY_SUBJECT;
+		var bodyEmail = new BodyBuilder();
+		var bodyHistories = string.Empty;
 
-        var bodyEmail = new BodyBuilder();
-        var bodyHistories = string.Empty;
-
-        foreach (var item in history.Histories)
-        {
-            if (item.Actor == "bot")
-            {
-                bodyHistories += $@"
-                <p style='margin: 0; overflow-wrap: break-word; font-weight: 600; line-height: 24px;color: #475569;'>{emailConfig.MAIL_HISTORY_FROM}, {item.Time.ToString("HH:mm")} :</p>
+		foreach (var item in history.Histories)
+		{
+			var createAt = DateTime.Parse(item.Time);
+			if (item.Actor == "bot")
+			{
+				bodyHistories += $@"
+                <p style='margin: 0; overflow-wrap: break-word; font-weight: 600; line-height: 24px;color: #475569;'>{emailConfig.MAIL_HISTORY_FROM}, {createAt.ToString("HH:mm")} :</p>
                 <p style='overflow-wrap: break-word; text-indent: 20px'>{item.Message}</p>
                 <div role='separator' style='line-height: 10px'>&zwj;</div>";
-                continue;
-            }
+				continue;
+			}
 
-            if (item.Actor == "content")
-            {
-                bodyHistories += $@"
-                <p style='margin: 0; overflow-wrap: break-word; font-weight: 600; line-height: 24px;color: #475569;'>{emailConfig.MAIL_HISTORY_FROM}, {item.Time.ToString("HH:mm")} :</p>
+			if (item.Actor == "content")
+			{
+				bodyHistories += $@"
+                <p style='margin: 0; overflow-wrap: break-word; font-weight: 600; line-height: 24px;color: #475569;'>{emailConfig.MAIL_HISTORY_FROM}, {createAt.ToString("HH:mm")} :</p>
                 <p style='overflow-wrap: break-word; text-indent: 20px'>{item.Message}</p>
                 <div role='separator' style='line-height: 10px'>&zwj;</div>
                 <div style='overflow-wrap: break-word; font-size: 14px'>
@@ -78,20 +78,20 @@ public class EmailHistoryHandler : INotificationHandler<EmailHistory>
                     </a>
                     <div role='separator' style='line-height: 14px'>&zwj;</div>
                 </div>";
-                continue;
-            }
+				continue;
+			}
 
-            if (item.Actor == "user")
-            {
-                bodyHistories += $@"
-                <p style='margin: 0; overflow-wrap: break-word; font-weight: 600; line-height: 24px;color: #475569'>{recipient.Full_Name}, {item.Time.ToString("HH:mm")} :</p>    
+			if (item.Actor == "user")
+			{
+				bodyHistories += $@"
+                <p style='margin: 0; overflow-wrap: break-word; font-weight: 600; line-height: 24px;color: #475569'>{recipient.Full_Name}, {createAt.ToString("HH:mm")} :</p>    
                 <p style='overflow-wrap: break-word; text-indent: 20px'>{item.Message}</p>
                 <div role='separator' style='line-height: 10px'>&zwj;</div>";
-                continue;
-            }
-        }
+				continue;
+			}
+		}
 
-        bodyEmail.HtmlBody = $@"
+		bodyEmail.HtmlBody = $@"
         <!DOCTYPE html>
         <html lang='en' xmlns:v='urn:schemas-microsoft-com:vml'>
         <head>
@@ -177,7 +177,7 @@ public class EmailHistoryHandler : INotificationHandler<EmailHistory>
         </body>
         </html>";
 
-        message.Body = bodyEmail.ToMessageBody();
-        return message;
-    }
+		message.Body = bodyEmail.ToMessageBody();
+		return message;
+	}
 }

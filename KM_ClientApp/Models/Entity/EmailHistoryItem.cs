@@ -2,9 +2,9 @@
 
 public class EmailHistoryItem
 {
-    public string? Actor { get; set; }
-    public string? Message { get; set; }
-    public DateTime Time { get; set; }
-    public string? Content { get; set; }
-    public string? Link { get; set; }
+	public string? Actor { get; set; }
+	public string? Message { get; set; }
+	public string Time { get; set; }
+	public string? Content { get; set; }
+	public string? Link { get; set; }
 }
