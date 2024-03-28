@@ -2,9 +2,9 @@ import {
   GetCategoriesAsync,
   GetReferenceCategoriesAsync,
   PostHeatSelectedCategory,
+  ReAskedCategoryStatus,
   SearchCategoriesAsync,
-  SuggestCategoriesAsync,
-  ReAskedCategoryStatus
+  SuggestCategoriesAsync
 } from '@/api/categories'
 import { GetContentByIdAsync } from '@/api/content'
 import { GetMessageByTypeAsync, MessageType } from '@/api/message'
@@ -371,8 +371,8 @@ export const useContentStore = defineStore('content', () => {
       await sessionStore.sessionHandler.update()
     },
     Message: async (messages) => {
+      const ready = useTimeout(delayTyping)
       for (let i = 0; i <= messages.length - 1; i++) {
-        const ready = useTimeout(delayTyping * i)
         const message = messages[i]
         sessionStore.recordHandler.addBotMessage(message)
         await promiseTimeout(delayTyping)
@@ -383,8 +383,8 @@ export const useContentStore = defineStore('content', () => {
       await sessionStore.sessionHandler.update()
     },
     MessageWithCategory: async (messages, categories) => {
+      const ready = useTimeout(delayTyping)
       for (let i = 0; i <= messages.length - 1; i++) {
-        const ready = useTimeout(delayTyping * i)
         const message = messages[i]
         sessionStore.recordHandler.addBotMessage(message)
         await promiseTimeout(delayTyping)
@@ -420,8 +420,8 @@ export const useContentStore = defineStore('content', () => {
       await sessionStore.sessionHandler.update()
     },
     ReAsked: async (contentId, reAskedMessages) => {
+      const ready = useTimeout(delayTyping)
       for (let i = 0; i <= reAskedMessages.length - 1; i++) {
-        const ready = useTimeout(delayTyping)
         const message = reAskedMessages[i]
         sessionStore.recordHandler.addBotMessage(message)
         await promiseTimeout(delayTyping)
@@ -434,8 +434,8 @@ export const useContentStore = defineStore('content', () => {
       await sessionStore.sessionHandler.update()
     },
     Ending: async (endMessage) => {
+      const ready = useTimeout(delayTyping)
       for (let i = 0; i <= endMessage.length - 1; i++) {
-        const ready = useTimeout(delayTyping * i)
         const message = endMessage[i]
         sessionStore.recordHandler.addBotMessage(message)
         await promiseTimeout(delayTyping)
