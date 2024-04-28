@@ -7,7 +7,7 @@ export const MessageType = Object.freeze({
   layer_one: 'layers/1',
   layer_two: 'layers/2',
   layer_three: 'layers/3',
-  mail_sended: 'mail_sended',
+  mail_sended: 'sended_mail',
   not_found: 'not_found',
   reasked: 'reasked',
   searched: 'searched',

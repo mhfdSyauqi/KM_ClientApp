@@ -73,7 +73,7 @@ function UserRecordProp(time, message) {
 <template>
   <div class="h-full bg-gray-100 p-5 gap-3 overflow-y-auto flex flex-col overflow-x-hidden">
     <p class="text-center text-xs text-gray-500">Today</p>
-    <template v-for="(item, index) in sessionStore.userSession.records" :key="index">
+    <template v-for="item in sessionStore.userSession.records" :key="item.time">
       <template v-if="item.actor === 'bot' && item.message">
         <BotTyping v-if="!item.rendered" />
         <BotMessage v-else :record="BotRecordProp(item.time, item.message)" />

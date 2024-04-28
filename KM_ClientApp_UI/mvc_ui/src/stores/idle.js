@@ -1,17 +1,19 @@
 import { GetMessageByTypeAsync, MessageType } from '@/api/message.js'
 
-import { acceptHMRUpdate, defineStore } from 'pinia'
-
 import { useSessionStore } from '@/stores/session.js'
-import { promiseTimeout, useTimeout } from '@vueuse/core'
 import { useConfigStore } from '@/stores/config.js'
 import { useContentStore } from '@/stores/content.js'
+import { useHelpdeskStore } from '@/stores/helpdesk.js'
+
+import { promiseTimeout, useTimeout } from '@vueuse/core'
+import { acceptHMRUpdate, defineStore } from 'pinia'
 import { ref } from 'vue'
 
 export const useIdleStore = defineStore('idle', () => {
   const configStore = useConfigStore()
   const sessionStore = useSessionStore()
   const contentStore = useContentStore()
+  const helpdeskStore = useHelpdeskStore()
 
   const delayTyping = configStore.appConfig?.delay_typing ?? 500
 
@@ -28,6 +30,10 @@ export const useIdleStore = defineStore('idle', () => {
     const idleMsg = await GetMessageByTypeAsync(MessageType.idle)
     if (!idleMsg.is_success && !closingMsg.is_success) {
       return await contentStore.ShowErrorContent()
+    }
+
+    if (helpdeskStore.windowOption.isOpen) {
+      helpdeskStore.closeWindow()
     }
 
     resetCallback()
