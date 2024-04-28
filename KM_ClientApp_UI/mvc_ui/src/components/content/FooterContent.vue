@@ -2,6 +2,8 @@
 import FeedbackComponent from '@/components/footer/FeedbackComponent.vue'
 import SearchComponent from '@/components/footer/SearchComponent.vue'
 import StartComponent from '@/components/footer/StartComponent.vue'
+import HelpdeskComponent from '@/components/footer/HelpdeskComponent.vue'
+
 import { useSessionStore } from '@/stores/session'
 
 const sessionStore = useSessionStore()
@@ -19,6 +21,8 @@ const sessionStore = useSessionStore()
   <StartComponent
     v-if="!sessionStore.userSession.is_active && sessionStore.userSession.has_feedback"
   />
+
+  <HelpdeskComponent />
 </template>
 
 <style scoped></style>

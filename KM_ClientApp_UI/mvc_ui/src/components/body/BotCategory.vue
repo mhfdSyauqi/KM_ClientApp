@@ -3,8 +3,10 @@ import ButtonCategory from '@/components/body/ButtonCategory.vue'
 import BotCategories from '@/shared/botCategories'
 
 import { useContentStore } from '@/stores/content'
+import { useHelpdeskStore } from '@/stores/helpdesk.js'
 
 const contentStore = useContentStore()
+const helpdeskStore = useHelpdeskStore()
 const props = defineProps({
   record: {
     type: BotCategories,
@@ -73,7 +75,13 @@ async function GoMainMenu() {
           </ButtonCategory>
         </li>
 
-        <li v-if="nextPage !== null">
+        <li v-if="props.record.is_not_found">
+          <ButtonCategory @click.prevent="helpdeskStore.openWindow"
+            >Send Email to Helpdesk</ButtonCategory
+          >
+        </li>
+
+        <li v-if="nextPage !== null && !props.record.is_not_found">
           <ButtonCategory @click.prevent="LoadMore">More...</ButtonCategory>
         </li>
         <li v-if="currLayer >= 2 || currPage > 1">

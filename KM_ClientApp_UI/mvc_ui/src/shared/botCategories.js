@@ -11,6 +11,7 @@ class BotCategories {
     this.is_closed = categories.is_closed
     this.is_reasked = categories.is_reasked
     this.is_idle = categories.is_idle
+    this.is_not_found = categories.is_not_found ?? false
   }
 }
 

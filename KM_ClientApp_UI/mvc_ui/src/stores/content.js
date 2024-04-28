@@ -228,7 +228,7 @@ export const useContentStore = defineStore('content', () => {
     }
 
     if (categoriesResponse.is_not_found) {
-      return await NotFoundCategoryContent(searchedKeyword, pageNum)
+      return await NotFoundCategoryContent(searchedKeyword)
     }
 
     sessionStore.recordHandler.markSelectedCategory()
@@ -267,31 +267,16 @@ export const useContentStore = defineStore('content', () => {
     return await Render.MessageWithCategory(messageResponse.messages, categoriesResponse.categories)
   }
 
-  async function NotFoundCategoryContent(searchedKeyword, pageNum) {
-    const response = await Promise.allSettled([
-      GetMessageByTypeAsync(MessageType.not_found, searchedKeyword),
-      SuggestCategoriesAsync(pageNum),
-      GetMessageByTypeAsync(MessageType.suggestion)
-    ])
+  async function NotFoundCategoryContent(searchedKeyword) {
+    const notFoundResponse = await GetMessageByTypeAsync(MessageType.not_found, searchedKeyword)
 
-    const notFoundResponse = response[0].value
-    const categoriesResponse = response[1].value
-    const messageResponse = response[2].value
-
-    if (
-      !notFoundResponse.is_success ||
-      !categoriesResponse.is_success ||
-      !messageResponse.is_success
-    ) {
+    if (!notFoundResponse.is_success) {
       return await ShowErrorContent()
     }
 
     sessionStore.recordHandler.markSelectedCategory()
 
-    notFoundResponse.messages.map((msg) => (msg.type = 'message'))
-    const messages = [...notFoundResponse.messages, ...messageResponse.messages]
-
-    return await Render.MessageWithCategory(messages, categoriesResponse.categories)
+    return await Render.NotFound(notFoundResponse.messages)
   }
 
   async function ResponseSelectedContent(contentId) {
@@ -365,6 +350,23 @@ export const useContentStore = defineStore('content', () => {
     return await Render.Ending(messageResponse.messages)
   }
 
+  async function HelpdeskContent() {
+    const mailSendResponse = await GetMessageByTypeAsync(MessageType.mail_sended)
+    const solvedResponse = await GetMessageByTypeAsync(MessageType.solved)
+
+    if (!mailSendResponse.is_success || !solvedResponse.is_success) {
+      return await ShowErrorContent()
+    }
+
+    mailSendResponse.messages.map((msg) => (msg.type = 'message'))
+    const messages = [...mailSendResponse.messages, ...solvedResponse.messages]
+
+    sessionStore.recordHandler.addUserMessage(null, 'Send Email To Helpdesk')
+    sessionStore.recordHandler.markSelectedCategory()
+
+    return await Render.Ending(messages)
+  }
+
   const Render = {
     Category: async (categories) => {
       sessionStore.recordHandler.addBotCategory(categories)
@@ -433,6 +435,20 @@ export const useContentStore = defineStore('content', () => {
       sessionStore.recordHandler.addBotCategory({ is_reasked: true, searched_identity: contentId })
       await sessionStore.sessionHandler.update()
     },
+    NotFound: async (notFoundMessage) => {
+      const ready = useTimeout(delayTyping)
+      for (let i = 0; i <= notFoundMessage.length - 1; i++) {
+        const message = notFoundMessage[i]
+        sessionStore.recordHandler.addBotMessage(message)
+        await promiseTimeout(delayTyping)
+        if (ready.value) {
+          sessionStore.recordHandler.markAsRendered()
+        }
+      }
+
+      sessionStore.recordHandler.addBotCategory({ is_not_found: true })
+      await sessionStore.sessionHandler.update()
+    },
     Ending: async (endMessage) => {
       const ready = useTimeout(delayTyping)
       for (let i = 0; i <= endMessage.length - 1; i++) {
@@ -461,7 +477,8 @@ export const useContentStore = defineStore('content', () => {
     EndConversationContent,
     FeedbackContent,
     ReAskedContent,
-    EndingReAskedContent
+    EndingReAskedContent,
+    HelpdeskContent
   }
 })
 
