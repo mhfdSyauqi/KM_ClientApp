@@ -6,7 +6,7 @@ using MimeKit;
 
 namespace KM_ClientApp.Endpoint.Email;
 
-public record EmailHistory(string LoginName, EmailHistoryRequest MailHistory) : INotification;
+public record EmailHistory(string LoginName,string SessionId, EmailHistoryRequest MailHistory) : INotification;
 
 public class EmailHistoryHandler : INotificationHandler<EmailHistory>
 {
@@ -21,15 +21,16 @@ public class EmailHistoryHandler : INotificationHandler<EmailHistory>
 	{
 		var emaiLTask = _emailRepository.GetMailConfigAsync(cancellationToken);
 		var recepientTask = _emailRepository.GetMailRecepientAsync(notification.LoginName, cancellationToken);
-
+        var userFeedbackTask = _emailRepository.GetUserFeedback(notification.SessionId, cancellationToken);
 		await Task.WhenAll(emaiLTask, recepientTask);
 
 		var emailConfig = await emaiLTask;
 		var recepient = await recepientTask;
+        var userFeedback = await userFeedbackTask;
 
 		if (emailConfig != null && recepient != null && emailConfig.MAIL_HISTORY_STATUS)
 		{
-			var emailMessage = CreateEmailMessage(emailConfig, recepient, notification.MailHistory);
+			var emailMessage = CreateEmailMessage(emailConfig, recepient, notification.MailHistory, userFeedback);
 
 			using var client = new SmtpClient();
 			await client.ConnectAsync(emailConfig.MAIL_CONFIG_SERVER, emailConfig.MAIL_CONFIG_PORT, MailKit.Security.SecureSocketOptions.StartTls, cancellationToken);
@@ -39,7 +40,24 @@ public class EmailHistoryHandler : INotificationHandler<EmailHistory>
 		}
 	}
 
-	private static MimeMessage CreateEmailMessage(EmailHistoryConfig emailConfig, EmailHistoryRecipient recipient, EmailHistoryRequest history)
+    private static string GetStarRating(int rating)
+    {
+        // Menghasilkan bintang berdasarkan rating
+        string stars = string.Empty;
+        for (int i = 0; i < rating; i++)
+        {
+            // Bintang berwarna kuning 
+            stars += "<span style='color: #FFD700; font-size: 35px;'>&#9733;</span>";
+        }
+        for (int i = rating; i < 4; i++)
+        {
+            // Bintang kosong 
+            stars += "<span style='color: #FFD700; font-size: 35px;'>&#9734;</span>";
+        }
+        return stars;
+    }
+
+    private static MimeMessage CreateEmailMessage(EmailHistoryConfig emailConfig, EmailHistoryRecipient recipient, EmailHistoryRequest history, UserFeedback userFeedback)
 	{
 		var message = new MimeMessage();
 		var mailboxFrom = new MailboxAddress(emailConfig.MAIL_HISTORY_FROM, emailConfig.MAIL_CONFIG_USERNAME);
@@ -49,17 +67,44 @@ public class EmailHistoryHandler : INotificationHandler<EmailHistory>
 		message.To.Add(mailboxTo);
 		message.Subject = emailConfig.MAIL_HISTORY_SUBJECT;
 
+        var headerEmail = string.Empty;
 		var bodyEmail = new BodyBuilder();
 		var bodyHistories = string.Empty;
+        var bodyFeedback = string.Empty;
 
-		foreach (var item in history.Histories)
+
+        headerEmail = $@"
+         <p>
+         <span style='overflow-wrap: break-word; text-indent: 20px;color:#888888;'>Subject   : </span>
+         <span style='margin: 0; overflow-wrap: break-word; font-weight: 600; line-height: 24px;color:#707070;'>{emailConfig.MAIL_HISTORY_FROM}</span>
+         </p>
+         <p>
+         <span style='overflow-wrap: break-word; text-indent: 20px;color:#888888;'>To              : </span>
+         <span style='margin: 0; overflow-wrap: break-word; font-weight: 600; line-height: 24px;color: #16a34a'>{recipient.Email}</span>
+         </p>
+         ";
+
+        bodyFeedback = $@"
+        
+        <p style='margin: 0; overflow-wrap: break-word; font-weight: 600; line-height: 24px;color: #707070; padding-top:10px; padding-bottom:10px;'>Rating     : </p>
+        <p style='margin: 0; overflow-wrap: break-word; font-weight: 600; line-height: 24px;padding-bottom:20px;'>{GetStarRating(userFeedback.Rating)}</p>
+        
+        <p style='margin: 0; overflow-wrap: break-word; font-weight: 600; line-height: 24px;color: #707070; padding-top:10px; padding-bottom:10px;'>Feedback   : </p>
+        <p style='margin: 0; overflow-wrap: break-word; line-height: 24px;color:#888888; padding-bottom:20px;'>{userFeedback.Remark}</p>
+
+        <div role='separator' style='line-height: 10px'>&zwj;</div>";
+
+        
+
+        foreach (var item in history.Histories)
 		{
 			var createAt = DateTime.Parse(item.Time);
+
 			if (item.Actor == "bot")
 			{
 				bodyHistories += $@"
-                <p style='margin: 0; overflow-wrap: break-word; font-weight: 600; line-height: 24px;color: #475569;'>{emailConfig.MAIL_HISTORY_FROM}, {createAt.ToString("HH:mm")} :</p>
-                <p style='overflow-wrap: break-word; text-indent: 20px'>{item.Message}</p>
+                <p style='margin: 0; overflow-wrap: break-word; font-weight: 600; line-height: 24px;color: #707070;'>{emailConfig.MAIL_HISTORY_FROM}, {createAt.ToString("HH:mm")} :</p>
+                <p style='overflow-wrap: break-word; text-indent: 20px; color:#888888;'>{item.Message}</p>
                 <div role='separator' style='line-height: 10px'>&zwj;</div>";
 				continue;
 			}
@@ -67,8 +112,8 @@ public class EmailHistoryHandler : INotificationHandler<EmailHistory>
 			if (item.Actor == "content")
 			{
 				bodyHistories += $@"
-                <p style='margin: 0; overflow-wrap: break-word; font-weight: 600; line-height: 24px;color: #475569;'>{emailConfig.MAIL_HISTORY_FROM}, {createAt.ToString("HH:mm")} :</p>
-                <p style='overflow-wrap: break-word; text-indent: 20px'>{item.Message}</p>
+                <p style='margin: 0; overflow-wrap: break-word; font-weight: 600; line-height: 24px;color: #707070;'>{emailConfig.MAIL_HISTORY_FROM}, {createAt.ToString("HH:mm")} :</p>
+                <p style='overflow-wrap: break-word; text-indent: 20px; color:#888888;'>{item.Message}</p>
                 <div role='separator' style='line-height: 10px'>&zwj;</div>
                 <div style='overflow-wrap: break-word; font-size: 14px'>
                     {item.Content}
@@ -84,8 +129,8 @@ public class EmailHistoryHandler : INotificationHandler<EmailHistory>
 			if (item.Actor == "user")
 			{
 				bodyHistories += $@"
-                <p style='margin: 0; overflow-wrap: break-word; font-weight: 600; line-height: 24px;color: #475569'>{recipient.Full_Name}, {createAt.ToString("HH:mm")} :</p>    
-                <p style='overflow-wrap: break-word; text-indent: 20px'>{item.Message}</p>
+                <p style='margin: 0; overflow-wrap: break-word; font-weight: 600; line-height: 24px;color: #707070'>{recipient.Full_Name}, {createAt.ToString("HH:mm")} :</p>    
+                <p style='overflow-wrap: break-word; text-indent: 20px; color:#888888;'>{item.Message}</p>
                 <div role='separator' style='line-height: 10px'>&zwj;</div>";
 				continue;
 			}
@@ -149,16 +194,20 @@ public class EmailHistoryHandler : INotificationHandler<EmailHistory>
             <table align='center' cellpadding='0' cellspacing='0' role='none'>
                 <tr>
                 <td style='width: 900px; max-width: 100%'>
-                    <div class='sm-my-8' style='margin-top: 48px; margin-bottom: 48px; text-align: center'>                  
-                    <p style='font-weight: 600; color: #475569'>
-                        {emailConfig.MAIL_HISTORY_FROM} Conversation History
-                    </p>
-                    </div>
+                   
                     <table style='width: 100%;' cellpadding='0' cellspacing='0' role='none'>
+                     <tr>
+                        <td class='sm-px-6' style='border-radius: 4px; background-color: #fff; padding-left: 48px ; padding-right:48px; padding-bottom:10px; padding-top:10px; font-size: 16px; color: #334155; box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05)'>
+                        {headerEmail}
+                        <div role='separator' style='background-color: #e2e8f0; height: 1px; line-height: 1px; margin: 32px 0'>&zwj;</div>
+                        </td>
+                    </tr>
                     <tr>
-                        <td class='sm-px-6' style='border-radius: 4px; background-color: #fff; padding: 48px; font-size: 16px; color: #334155; box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05)'>
+                        <td class='sm-px-6' style='border-radius: 4px; background-color: #fff; padding-left: 48px ; padding-right:48px; padding-bottom:10px; padding-top:10px; font-size: 16px; color: #334155; box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05)'>
                         {bodyHistories}
-                        <div role='separator' style='background-color: #e2e8f0; height: 1px; line-height: 1px; margin: 32px 0'>&zwj;</div><p style='font-size: 14px; font-style: italic; line-height: 18px'>
+                        <div role='separator' style='background-color: #e2e8f0; height: 1px; line-height: 1px; margin: 32px 0'>&zwj;</div>
+                        {bodyFeedback}
+                        <p style='font-size: 14px; font-style: italic; line-height: 18px'>
                             This is automatic email from your {emailConfig.MAIL_HISTORY_FROM},
                             <br>
                             please do not reply

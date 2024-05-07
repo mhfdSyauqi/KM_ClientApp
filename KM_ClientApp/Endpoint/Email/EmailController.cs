@@ -1,4 +1,5 @@
 ﻿using KM_ClientApp.Controllers;
+using KM_ClientApp.Endpoint.Session.Query;
 using KM_ClientApp.Models.Request;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -19,7 +20,11 @@ public class EmailController : MyAPIController
         string computerName = User.Identity?.Name ?? "Error\\NotAuthUser";
         string loginName = computerName.Split("\\")[1];
 
-        var emailHistory = new EmailHistory(loginName, emailHistories);
+        var query = new GetSessionFeedbackQuery(loginName);
+        var result = await Sender.Send(query, cancellationToken);
+
+        var emailHistory = new EmailHistory(loginName,result.Value.Id, emailHistories);
+        
         await Publisher.Publish(emailHistory, cancellationToken);
 
         return NoContent();

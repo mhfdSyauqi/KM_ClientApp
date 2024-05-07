@@ -80,6 +80,26 @@ public class SessionRepository : ISessionRepository
         return result;
     }
 
+    public async Task<GetSessionFeedback?> GetSessionFeedbackByUserNameAsync(string userName, CancellationToken cancellationToken)
+    {
+        using var connection = await _connection.CreateConnectionAsync();
+
+        string query = @"
+                SELECT
+                    uid
+                FROM 
+                    [dbo].[View_Inactive_User_Session_Record]
+                WHERE 
+                    create_by = @UserName
+        ";
+
+        var command = new CommandDefinition(query, new { UserName = userName }, cancellationToken: cancellationToken);
+
+        var result = await connection.QueryFirstOrDefaultAsync<GetSessionFeedback?>(command);
+
+        return result;
+    }
+
     public async Task<int> PatchActiveSessionAsync(PatchSessionRequest request, CancellationToken cancellationToken)
     {
         using var connection = await _connection.CreateConnectionAsync();
@@ -112,4 +132,5 @@ public interface ISessionRepository
     Task<int> EndSessionAsync(EndSessionRequest request, CancellationToken cancellationToken);
     Task<GetSession?> GetSessionByUserNameAsync(string userName, CancellationToken cancellationToken);
     Task<int> PatchActiveSessionAsync(PatchSessionRequest request, CancellationToken cancellationToken);
+    Task<GetSessionFeedback?> GetSessionFeedbackByUserNameAsync(string userName, CancellationToken cancellationToken);
 }
