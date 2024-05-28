@@ -33,7 +33,8 @@ public class GetConfigurationHandler : IQueryHandler<GetConfigurationQuery, Conf
             Article_Link = config.Article_Link,
             Delay_Typing = config.Delay_Typing,
             Idle_Attempt = config.Idle_Attempt,
-            Idle_Duration = config.Idle_Duration
+            Idle_Duration = config.Idle_Duration,
+            Keywords = config.Keywords
         };
 
         return Result.Success(response);
