@@ -3,9 +3,11 @@ import IconSend from '@/components/icons/IconSend.vue'
 import { useContentStore } from '@/stores/content'
 import { promiseTimeout, useTimeout } from '@vueuse/core'
 import { ref, watchEffect } from 'vue'
+import { useConfigStore } from '@/stores/config.js'
 
 const wordsLimit = 100
 const contentStore = useContentStore()
+const configStore = useConfigStore()
 
 const userInformation = ref('')
 const searchEl = ref(null)
@@ -73,9 +75,10 @@ async function UserSubmit() {
   if (showError.value) return
 
   const searchedLength = +searchInput.value.length
-  if (searchedLength >= 0 && searchedLength < 3) {
+  const keywordLimit = configStore.appConfig.keywords
+  if (searchedLength >= 0 && searchedLength < keywordLimit) {
     ToggleShowError('on')
-    SetUserInformation('Minimal keyword tediri dari 3 huruf')
+    SetUserInformation(`Minimal keyword tediri dari ${keywordLimit} huruf`)
     return
   }
 

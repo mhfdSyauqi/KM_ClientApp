@@ -9,4 +9,5 @@ public class ConfigurationResponse
     public int Delay_Typing { get; set; }
     public int Idle_Duration { get; set; }
     public int Idle_Attempt { get; set; }
+    public int Keywords { get; set; }
 }
