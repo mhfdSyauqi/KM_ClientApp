@@ -6,10 +6,12 @@ import { acceptHMRUpdate, defineStore } from 'pinia'
 import { useTimeout, promiseTimeout, useArrayMap } from '@vueuse/core'
 import { ref } from 'vue'
 import { useContentStore } from '@/stores/content.js'
+import { useConfigStore } from '@/stores/config.js'
 
 export const useFeedbackStore = defineStore('feedback', () => {
   const sessionStore = useSessionStore()
   const contentStore = useContentStore()
+  const configStore = useConfigStore()
 
   const windowOption = ref({
     isOpen: false,
@@ -117,7 +119,7 @@ export const useFeedbackStore = defineStore('feedback', () => {
           Time: item.time,
           Message: item.content.message?.text,
           Content: item.content.description,
-          Link: item.content.id
+          Link: configStore.appConfig.article_link + '/' + item.content.id
         }
       }
       if (item.actor === 'user') {
