@@ -35,17 +35,17 @@ public class MessageRepository : IMessageRepository
 
         foreach (var msg in result)
         {
-            bool isUserName = msg.Contents.Contains("@UserName");
-            bool isSelected = msg.Contents.Contains("@SelectedCategory");
+            bool isUserName = msg.Contents.Contains("@username");
+            bool isSelected = msg.Contents.Contains("@category");
 
             if (isUserName)
             {
-                msg.Contents = msg.Contents.Replace("@UserName", messageRequest.User_Name);
+                msg.Contents = msg.Contents.Replace("@username", messageRequest.User_Name);
             }
 
             if (isSelected)
             {
-                msg.Contents = msg.Contents.Replace("@SelectedCategory", messageRequest.Selected_Category);
+                msg.Contents = msg.Contents.Replace("@category", messageRequest.Selected_Category);
             }
         }
 
