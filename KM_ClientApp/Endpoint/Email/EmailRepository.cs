@@ -104,6 +104,28 @@ public class EmailRepository : IEmailRepository
         return result;
     }
 
+    public async Task<UserFeedback?> GetUserFeedback(string sessionId, CancellationToken cancellationToken)
+    {
+        using var connection = await _connection.CreateConnectionAsync();
+        Guid uid_session = Guid.Parse(sessionId);
+
+        string query = @"
+           SELECT 
+                [rating],    
+                [remark]   
+            FROM 
+                [KnowledgeManagement].[dbo].[User_Feedback]
+            WHERE
+                [uid_session_header] = @uid_session
+    ";
+
+        var command = new CommandDefinition(query, new { uid_session = uid_session }, cancellationToken: cancellationToken);
+        var result = await connection.QueryFirstOrDefaultAsync<UserFeedback?>(command);
+
+        return result;
+    }
+
+
     public async Task<int> PostMailHelpdeskAsync(EmailHelpdeskFilter email, CancellationToken cancellationToken)
     {
         using var connection = await _connection.CreateConnectionAsync();
@@ -130,4 +152,5 @@ public interface IEmailRepository
     Task<EmailHelpdeskConfig?> GetEmailHelpdeskConfigAsync(CancellationToken cancellationToken);
     Task<EmailHelpdeskFormat?> GetEmalHelpdeskFormat(string LoginName, CancellationToken cancellationToken);
     Task<int> PostMailHelpdeskAsync(EmailHelpdeskFilter email, CancellationToken cancellationToken);
+    Task<UserFeedback?> GetUserFeedback(string sessionId, CancellationToken cancellationToken);
 }

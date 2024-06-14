@@ -22,6 +22,9 @@ public class Data
     public GetSessionResponse? Session { get; set; }
 
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public GetSessionFeedbackResponse? SessionId { get; set; }
+
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public List<BotMessageResponse>? Messages { get; set; }
 
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
