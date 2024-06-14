@@ -6,6 +6,7 @@ import { useConfigStore } from '@/stores/config.js'
 import { acceptHMRUpdate, defineStore } from 'pinia'
 import { useArrayFilter } from '@vueuse/core'
 import { ref } from 'vue'
+import { nanoid } from 'nanoid'
 
 export const useSessionStore = defineStore('session', () => {
   const contentStore = useContentStore()
@@ -73,6 +74,7 @@ export const useSessionStore = defineStore('session', () => {
   const recordHandler = {
     addUserMessage: (categoryId, categoryName) => {
       const userRecord = {
+        id: nanoid(10),
         time: new Date().toISOString(),
         message: {
           text: categoryName
@@ -84,6 +86,7 @@ export const useSessionStore = defineStore('session', () => {
     },
     addBotMessage: (messages) => {
       const botMessage = {
+        id: nanoid(10),
         time: new Date().toISOString(),
         actor: 'bot',
         message: messages,
@@ -93,6 +96,7 @@ export const useSessionStore = defineStore('session', () => {
     },
     addBotCategory: (categories) => {
       const botCategory = {
+        id: nanoid(10),
         time: new Date().toISOString(),
         actor: 'bot',
         categories: {
@@ -104,6 +108,7 @@ export const useSessionStore = defineStore('session', () => {
     },
     addErrorMessage: () => {
       let errRecord = {
+        id: nanoid(10),
         time: new Date().toISOString(),
         actor: 'error',
         rendered: false
@@ -112,6 +117,7 @@ export const useSessionStore = defineStore('session', () => {
     },
     addBotContent: (responseContent, singleMessage = null) => {
       let contentRecord = {
+        id: nanoid(10),
         time: new Date().toISOString(),
         actor: 'bot',
         content: {
