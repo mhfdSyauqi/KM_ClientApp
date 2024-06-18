@@ -84,11 +84,11 @@ async function GoMainMenu() {
         <li v-if="nextPage !== null && !props.record.is_not_found">
           <ButtonCategory @click.prevent="LoadMore">More...</ButtonCategory>
         </li>
-        <li v-if="currLayer >= 2 || currPage > 1">
-          <ButtonCategory @click.prevent="GoBack">Go Back</ButtonCategory>
+        <li v-if="currPage > 1">
+          <ButtonCategory @click.prevent="GoBack">Back</ButtonCategory>
         </li>
         <li v-if="currLayer > 1 || !isCommon">
-          <ButtonCategory @click.prevent="GoMainMenu">Go Main Menu</ButtonCategory>
+          <ButtonCategory @click.prevent="GoMainMenu">Main Menu</ButtonCategory>
         </li>
       </ul>
     </div>
