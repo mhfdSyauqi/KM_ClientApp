@@ -57,13 +57,13 @@ export const useFeedbackStore = defineStore('feedback', () => {
   }
 
   async function SendValidator() {
-    if (rating.value.value === 0 && remark.value.value === '') {
+    if (rating.value.value === 0 || remark.value.value === '') {
       SetRatingError('*Required')
       SetRemarkError('*Required')
       return false
     }
 
-    if (remark.value.value === '') {
+    if (rating.value.value > 0 && remark.value.value === '') {
       SetRemarkError('*Please provide your reason')
       return false
     }
