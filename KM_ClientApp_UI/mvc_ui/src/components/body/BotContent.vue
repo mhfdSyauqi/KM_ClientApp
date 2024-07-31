@@ -61,7 +61,7 @@ function LoadAlterNative(e) {
   @apply list-inside list-decimal;
 }
 
-.bot-content :deep(p) {
+.bot-content :deep(*) {
   @apply text-left break-words;
 }
 </style>

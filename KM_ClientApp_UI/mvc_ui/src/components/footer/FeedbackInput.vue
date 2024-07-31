@@ -43,7 +43,7 @@ function onRated(rating) {
 <template>
   <div class="absolute w-full h-full top-0 left-0 bg-gray-400 bg-opacity-55 flex">
     <div
-      class="w-[85%] h-[70%] bg-white rounded-bl-3xl rounded-tr-3xl m-auto flex flex-col px-10 py-7 justify-between"
+      class="w-[28svw] h-[62svh] 2xl:w-[25svw] 2xl:h-[50svh] bg-white rounded-bl-3xl rounded-tr-3xl m-auto flex flex-col px-10 py-7 justify-between"
     >
       <h1 class="basis-1/5 font-bold xl:text-2xl">How satisfied are you with our service ?</h1>
 
