@@ -5,8 +5,10 @@ import { ref } from 'vue'
 
 const feedbackStore = useFeedbackStore()
 const remarkEl = ref(null)
-const textAreaRow = window.innerHeight < 768 ? null : 4
+const textAreaRow =
+  window.innerHeight < 768 ? null : window.innerHeight > 768 || window.innerHeight < 1080 ? 3 : 4
 
+const isMiniScreen = window.innerHeight <= 645
 function onMouseHover(rating) {
   const maxKey = Math.max(...feedbackStore.ratingStars.map((prop) => prop.key))
   if (rating.key > 1) {
@@ -41,24 +43,27 @@ function onRated(rating) {
 </script>
 
 <template>
-  <div class="absolute w-full h-full top-0 left-0 bg-gray-400 bg-opacity-55 flex px-5 2xl:px-0">
+  <div class="absolute w-full h-full top-0 left-0 bg-gray-400 bg-opacity-55 flex p-5 2xl:px-0">
     <div
-      class="w-[90svw] h-[85svh] md:w-[60svw] md:h-[62svh] 2xl:w-[25svw] 2xl:h-[50svh] bg-white rounded-bl-3xl rounded-tr-3xl m-auto flex flex-col px-10 py-7 justify-between"
+      class="w-[85%] h-[60%] md:w-[60%] md:h-[60%] lg:w-[87%] lg:h-[82%] 2xl:w-[85%] 2xl:h-[65%] bg-white rounded-bl-3xl rounded-tr-3xl m-auto flex flex-col px-10 py-5 md:py-7 gap-2.5"
+      :class="{ '!h-[75%]': isMiniScreen }"
     >
-      <h1 class="basis-1/5 font-bold xl:text-2xl">How satisfied are you with our service ?</h1>
+      <h1 class="basis-[20%] font-bold text-xl 2xl:text-2xl">
+        How satisfied are you with our service ?
+      </h1>
 
-      <div class="basis-1/5 rating-wrapper">
-        <p class="text-gray-600 text-sm xl:text-base">Add your rating and feedback message</p>
+      <div class="basis-[20%] rating-wrapper">
+        <p class="text-gray-600">Add your rating and feedback message</p>
         <div class="flex" @mouseleave="onMoseLeave">
           <template v-for="n in feedbackStore.ratingStars" :key="n.key">
             <IconStar
               :is-hover="n.isHover"
-              class="w-8 h-8 xl::w-10 xl:h-10 fill-amber-400 cursor-pointer active:scale-95"
+              class="w-8 h-8 2xl:w-10 2xl:h-10 fill-amber-400 cursor-pointer active:scale-95"
               @mouseover.prevent="onMouseHover(n)"
               @click.prevent="onRated(n)"
             />
           </template>
-          <p class="text-sm xl:text-base">
+          <p class="text-sm md:text-base">
             <small
               class="mt-2 text-red-600 transition duration-150 ease-in"
               v-show="feedbackStore.rating.showErr"
@@ -69,9 +74,9 @@ function onRated(rating) {
         </div>
       </div>
 
-      <div class="basis-2/5 remark-wrapper">
-        <h4 class="font-bold text-gray-600 mb-2 text-sm xl:text-base">FEEDBACK</h4>
-        <p class="text-gray-600 mb-1 text-sm xl:text-base">
+      <div class="basis-[40%] md:basis-[50%] remark-wrapper text-sm md:text-base">
+        <h4 class="font-bold text-gray-600 mb-2">FEEDBACK</h4>
+        <p class="text-gray-600 mb-1">
           What can we improve ?
           <small class="text-red-600" v-show="feedbackStore.remark.showErr">
             {{ feedbackStore.remark.errMsg }}
@@ -86,7 +91,7 @@ function onRated(rating) {
         />
       </div>
 
-      <div class="basis-auto lg:text-sm xl:text-base flex justify-end gap-3">
+      <div class="basis-[10%] lg:text-sm xl:text-base flex justify-end gap-3">
         <button
           class="w-auto max-md:w-1/2 bg-transparent p-2 max-md:py-1.5 text-red-700 font-medium rounded-xl hover:bg-red-700 hover:text-white active:scale-95 max-sm:w-1/2 max-sm:bg-red-700 max-sm:text-white text-center"
           @click="feedbackStore.windowOption.isOpen = false"
