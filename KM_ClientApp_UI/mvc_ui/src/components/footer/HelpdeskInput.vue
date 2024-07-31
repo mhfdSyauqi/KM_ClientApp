@@ -7,9 +7,9 @@ const textAreaRow = window.innerHeight < 768 ? 3 : 5
 </script>
 
 <template>
-  <div class="absolute w-full h-full top-0 left-0 bg-gray-400 bg-opacity-55 flex">
+  <div class="absolute w-full h-full top-0 left-0 bg-gray-400 bg-opacity-55 flex px-5 2xl:px-0">
     <div
-      class="w-[30svw] h-[45svh] 2xl:w-[25svw] 2xl:h-[40svh] bg-white rounded-bl-3xl rounded-tr-3xl m-auto flex flex-col px-10 py-7 gap-5"
+      class="w-[90svw] h-[75svh] md:w-[60svw] md:h-[45svh] 2xl:w-[25svw] 2xl:h-[40svh] bg-white rounded-bl-3xl rounded-tr-3xl m-auto flex flex-col px-10 py-7 gap-5"
     >
       <h1 class="basis-1/5 font-bold xl:text-2xl text-center">Send us a message!</h1>
 
