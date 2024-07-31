@@ -3,17 +3,20 @@ import { useHelpdeskStore } from '@/stores/helpdesk.js'
 
 const helpdeskStore = useHelpdeskStore()
 
-const textAreaRow = window.innerHeight < 768 ? null : 3
+const textAreaRow =
+  window.innerHeight < 768 ? null : window.innerHeight > 768 || window.innerHeight < 1080 ? 4 : 5
+
+console.log(window.innerHeight)
 </script>
 
 <template>
   <div class="absolute w-full h-full top-0 left-0 bg-gray-400 bg-opacity-55 flex px-5 2xl:px-0">
     <div
-      class="w-[80svw] h-[37svh] md:w-[60svw] md:h-[45svh] 2xl:w-[25svw] 2xl:h-[40svh] bg-white rounded-bl-3xl rounded-tr-3xl m-auto flex flex-col px-10 py-7 gap-5"
+      class="w-[95%] h-[45%] md:w-[75%] md:h-[40%] lg:w-[85%] lg:h-[50%] 2xl:w-[80%] 2xl:h-[40%] bg-white rounded-bl-3xl rounded-tr-3xl m-auto flex flex-col px-10 py-5 md:py-7 gap-3.5"
     >
-      <h1 class="basis-[15%] font-bold text-xl xl:text-2xl text-center">Send us a message!</h1>
+      <h1 class="basis-[25%] font-bold text-xl xl:text-2xl text-center">Send us a message!</h1>
 
-      <div class="basis-[65%] remark-wrapper">
+      <div class="basis-[60%] remark-wrapper">
         <p class="text-gray-600 mb-1 text-sm xl:text-base">
           Message
           <small class="text-red-600">* {{ helpdeskStore.userMessage.errMsg }} </small>
