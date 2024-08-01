@@ -15,6 +15,7 @@ onMounted(async () => {
       if (current.isOpen && iframe.value.src === 'about:blank') {
         //iframe.value.src = 'https://localhost:44356/'
         iframe.value.src = 'http://localhost:5173/'
+        //iframe.value.src = 'http://localhost:4173'
       }
     },
     { deep: true }

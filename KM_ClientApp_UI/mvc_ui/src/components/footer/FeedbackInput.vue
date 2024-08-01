@@ -45,8 +45,8 @@ function onRated(rating) {
 <template>
   <div class="absolute w-full h-full top-0 left-0 bg-gray-400 bg-opacity-55 flex p-5 2xl:px-0">
     <div
-      class="w-[85%] h-[60%] md:w-[60%] md:h-[60%] lg:w-[87%] lg:h-[82%] 2xl:w-[85%] 2xl:h-[65%] bg-white rounded-bl-3xl rounded-tr-3xl m-auto flex flex-col px-10 py-5 md:py-7 gap-2.5"
-      :class="{ '!h-[75%]': isMiniScreen }"
+      class="w-[85%] h-[60%] md:w-[60%] md:h-[60%] lg:w-[87%] lg:h-[82%] 2xl:w-[85%] 2xl:h-[65%] bg-white rounded-bl-3xl rounded-tr-3xl m-auto flex flex-col px-10 py-5 md:py-7 gap-2.5 justify-center"
+      :class="{ '!h-[85%]': isMiniScreen }"
     >
       <h1 class="basis-[20%] font-bold text-xl 2xl:text-2xl">
         How satisfied are you with our service ?
@@ -74,7 +74,7 @@ function onRated(rating) {
         </div>
       </div>
 
-      <div class="basis-[40%] md:basis-[50%] remark-wrapper text-sm md:text-base">
+      <div class="basis-[35%] md:basis-[50%] remark-wrapper text-sm md:text-base">
         <h4 class="font-bold text-gray-600 mb-2">FEEDBACK</h4>
         <p class="text-gray-600 mb-1">
           What can we improve ?
