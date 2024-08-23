@@ -78,7 +78,7 @@ async function UserSubmit() {
   const keywordLimit = configStore.appConfig.keywords
   if (searchedLength >= 0 && searchedLength < keywordLimit) {
     ToggleShowError('on')
-    SetUserInformation(`Minimal keyword tediri dari ${keywordLimit} huruf`)
+    SetUserInformation(`Minimal keyword terdiri dari ${keywordLimit} huruf`)
     return
   }
 

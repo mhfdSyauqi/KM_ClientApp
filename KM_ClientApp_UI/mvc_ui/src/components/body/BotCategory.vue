@@ -4,6 +4,7 @@ import BotCategories from '@/shared/botCategories'
 
 import { useContentStore } from '@/stores/content'
 import { useHelpdeskStore } from '@/stores/helpdesk.js'
+import IconUndo from '@/components/icons/IconUndo.vue'
 
 const contentStore = useContentStore()
 const helpdeskStore = useHelpdeskStore()
@@ -42,6 +43,7 @@ async function GoBack() {
   if (!isCommon) {
     return await contentStore.Searched.GoBackCategory(currSearchedKeyword, prevPage, createAt)
   }
+
   return await contentStore.Common.GoBackCategory(currSearchedId, currLayer, prevPage, createAt)
 }
 
@@ -65,6 +67,12 @@ async function GoMainMenu() {
     <div class="flex justify-start items-end">
       <div class="basis-[12%]">&nbsp;</div>
       <ul class="basis-[70%] flex flex-row flex-wrap items-start gap-2 mr-7">
+        <li v-if="currLayer === 3 && currPage === 1">
+          <ButtonCategory title="Previous Layer" @click.prevent="GoBack">
+            <IconUndo class="fill-gray-500 h-5 w-8" />
+          </ButtonCategory>
+        </li>
+
         <li
           v-for="category in props.record.items"
           :key="category.id"

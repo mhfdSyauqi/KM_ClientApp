@@ -34,7 +34,7 @@ function LoadAlterNative(e) {
       />
     </div>
     <div
-      class="basis-auto max-w-[50%] h-full text-sm bg-white drop-shadow-lg p-3 rounded-xl rounded-bl-none"
+      class="basis-auto max-w-[65%] h-full text-sm bg-white drop-shadow-lg p-3 rounded-xl rounded-bl-none"
     >
       <div v-show="botMessages?.length > 0">
         <p v-for="(message, index) in botMessages" :key="index">

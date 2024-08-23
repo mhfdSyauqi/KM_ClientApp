@@ -42,21 +42,13 @@ public class EmailRepository : IEmailRepository
     {
         using var connection = await _connection.CreateConnectionAsync();
 
-        string query = @"
-               SELECT 
-                    [Login_Name],
-	                [Full_Name],
-                    [Job_Title],
-                    [Office_Location]
-                FROM 
-	                [ITAssetsManagement].[dbo].[User_Profile]
-                WHERE
-	                [Login_Name] = @Login_Name
-        ";
-
-        var command = new CommandDefinition(query, new { Login_Name = LoginName }, cancellationToken: cancellationToken);
+        var storeProcedureName = "[dbo].[Get_User_Mail]";
+        var filterLoginName = new
+        {
+            Login_Name = LoginName
+        };
+        var command = new CommandDefinition(storeProcedureName, filterLoginName, commandType: System.Data.CommandType.StoredProcedure, cancellationToken: cancellationToken);
         var result = await connection.QueryFirstOrDefaultAsync<EmailHelpdeskFormat?>(command);
-
         return result;
     }
 
@@ -88,19 +80,13 @@ public class EmailRepository : IEmailRepository
     {
         using var connection = await _connection.CreateConnectionAsync();
 
-        string query = @"
-               SELECT 
-	                [Full_Name],    
-	                [Email]   
-                FROM 
-	                [ITAssetsManagement].[dbo].[User_Profile]
-                WHERE
-	                [Login_Name] = @Login_Name
-        ";
-
-        var command = new CommandDefinition(query, new { Login_Name = loginName }, cancellationToken: cancellationToken);
+        var storeProcedureName = "[dbo].[Get_User_Mail]";
+        var filterLoginName = new
+        {
+            Login_Name = loginName
+        };
+        var command = new CommandDefinition(storeProcedureName, filterLoginName, commandType: System.Data.CommandType.StoredProcedure, cancellationToken: cancellationToken);
         var result = await connection.QueryFirstOrDefaultAsync<EmailHistoryRecipient?>(command);
-
         return result;
     }
 

@@ -69,6 +69,28 @@ export const useContentStore = defineStore('content', () => {
       return await Render.Category(categoriesResponse.categories)
     },
     GoBackCategory: async (currentSearchedId, currLayer, prevPage, createAt) => {
+      if (currLayer === 3 && prevPage === null) {
+        const refResponse = await GetReferenceCategoriesAsync(currentSearchedId)
+
+        if (!refResponse.is_success) {
+          return await ShowErrorContent()
+        }
+
+        const contentObj = {
+          id: refResponse.reference,
+          name: 'Back'
+        }
+
+        sessionStore.recordHandler.addUserMessage(contentObj.id, contentObj.name)
+        sessionStore.recordHandler.markSelectedCategory(createAt)
+
+        return await ResponseLayeredContent({
+          searchedId: contentObj.id,
+          searchedName: contentObj.name,
+          messageType: MessageType.layer_two
+        })
+      }
+
       return await Common.LoadMoreCategory(currentSearchedId, prevPage, createAt)
     },
     GoMainMenu: async (currentLayer, createAt) => {
