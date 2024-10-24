@@ -1,6 +1,5 @@
 ﻿using KM_ClientApp.Models.Entity;
 using KM_ClientApp.Models.Request;
-using MailKit.Net.Smtp;
 using MediatR;
 using MimeKit;
 
@@ -20,42 +19,26 @@ public class EmailHistoryHandler : INotificationHandler<EmailHistory>
     public async Task Handle(EmailHistory notification, CancellationToken cancellationToken)
     {
         var emailLog = new EmailLog();
+        var emaiLTask = _emailRepository.GetMailConfigAsync(cancellationToken);
+        var recepientTask = _emailRepository.GetMailRecepientAsync(notification.LoginName, cancellationToken);
+        var userFeedbackTask = _emailRepository.GetUserFeedback(notification.SessionId, cancellationToken);
 
-        try
+        await Task.WhenAll(emaiLTask, recepientTask, userFeedbackTask);
+
+        var emailConfig = await emaiLTask;
+        var recepient = await recepientTask;
+        var userFeedback = await userFeedbackTask;
+
+        if (emailConfig == null && recepient == null && !emailConfig!.MAIL_HISTORY_STATUS)
         {
-            var emaiLTask = _emailRepository.GetMailConfigAsync(cancellationToken);
-            var recepientTask = _emailRepository.GetMailRecepientAsync(notification.LoginName, cancellationToken);
-            var userFeedbackTask = _emailRepository.GetUserFeedback(notification.SessionId, cancellationToken);
-
-            await Task.WhenAll(emaiLTask, recepientTask, userFeedbackTask);
-
-            var emailConfig = await emaiLTask;
-            var recepient = await recepientTask;
-            var userFeedback = await userFeedbackTask;
-
-            if (emailConfig == null && recepient == null && !emailConfig!.MAIL_HISTORY_STATUS)
-            {
-                throw new Exception("Mail configuration invalid or disabled by system");
-            }
-
-            var emailMessage = CreateEmailMessage(emailConfig!, recepient!, notification.MailHistory, userFeedback!);
-
-            emailLog.To = recepient!.Email;
-            emailLog.Subject = emailMessage.Subject;
-            emailLog.Body = emailMessage.HtmlBody.ToString().Trim();
-
-            using var client = new SmtpClient();
-            await client.ConnectAsync(emailConfig!.MAIL_CONFIG_SERVER, emailConfig.MAIL_CONFIG_PORT, MailKit.Security.SecureSocketOptions.StartTls, cancellationToken);
-            await client.AuthenticateAsync(emailConfig.MAIL_CONFIG_USERNAME, emailConfig.MAIL_CONFIG_PASSWORD, cancellationToken);
-            await client.SendAsync(emailMessage, cancellationToken);
-            await client.DisconnectAsync(true, cancellationToken);
-        }
-        catch (Exception ex)
-        {
-            emailLog.SendStatus = "Failed";
-            emailLog.ErrorMsg = ex.Message;
+            throw new Exception("Mail configuration invalid or disabled by system");
         }
 
+        var emailMessage = CreateEmailMessage(emailConfig!, recepient!, notification.MailHistory, userFeedback!);
+
+        emailLog.To = recepient!.Email;
+        emailLog.Subject = emailMessage.Subject;
+        emailLog.Body = emailMessage.HtmlBody.ToString().Trim();
         await _emailRepository.PostMailLogAsync(emailLog, cancellationToken);
     }
 

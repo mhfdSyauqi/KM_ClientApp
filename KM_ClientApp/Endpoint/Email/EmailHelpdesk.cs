@@ -1,6 +1,5 @@
 ﻿using KM_ClientApp.Models.Entity;
 using KM_ClientApp.Models.Request;
-using MailKit.Net.Smtp;
 using MediatR;
 using MimeKit;
 
@@ -20,38 +19,25 @@ public class EmailHelpdeskHandler : INotificationHandler<EmailHelpdesk>
     public async Task Handle(EmailHelpdesk notification, CancellationToken cancellationToken)
     {
         var emailLog = new EmailLog();
-        try
+
+        var emailTask = _emailRepository.GetEmailHelpdeskConfigAsync(cancellationToken);
+        var formatTask = _emailRepository.GetEmailHelpdeskFormat(notification.Request.Send_By, cancellationToken);
+
+        await Task.WhenAll(formatTask, emailTask);
+
+        var emailConfig = await emailTask;
+        var emailFormat = await formatTask;
+
+        if (emailConfig == null && emailFormat == null)
         {
-            var emailTask = _emailRepository.GetEmailHelpdeskConfigAsync(cancellationToken);
-            var formatTask = _emailRepository.GetEmailHelpdeskFormat(notification.Request.Send_By, cancellationToken);
-
-            await Task.WhenAll(formatTask, emailTask);
-
-            var emailConfig = await emailTask;
-            var emailFormat = await formatTask;
-
-            if (emailConfig == null && emailFormat == null)
-            {
-                throw new Exception("Mail configuration invalid");
-            }
-
-            var emailMessage = CreateEmailMessage(emailConfig!, emailFormat!, notification.Request.Message);
-
-            emailLog.To = emailConfig!.MAIL_HELPDESK_TO;
-            emailLog.Subject = emailMessage.Subject;
-            emailLog.Body = emailMessage.HtmlBody.ToString().Trim();
-
-            using var client = new SmtpClient();
-            await client.ConnectAsync(emailConfig!.MAIL_CONFIG_SERVER, emailConfig.MAIL_CONFIG_PORT, MailKit.Security.SecureSocketOptions.StartTls, cancellationToken);
-            await client.AuthenticateAsync(emailConfig.MAIL_CONFIG_USERNAME, emailConfig.MAIL_CONFIG_PASSWORD, cancellationToken);
-            await client.SendAsync(emailMessage, cancellationToken);
-            await client.DisconnectAsync(true, cancellationToken);
+            throw new Exception("Mail configuration invalid");
         }
-        catch (Exception ex)
-        {
-            emailLog.SendStatus = "Failed";
-            emailLog.ErrorMsg = ex.Message;
-        }
+
+        var emailMessage = CreateEmailMessage(emailConfig!, emailFormat!, notification.Request.Message);
+
+        emailLog.To = emailConfig!.MAIL_HELPDESK_TO;
+        emailLog.Subject = emailMessage.Subject;
+        emailLog.Body = emailMessage.HtmlBody.ToString().Trim();
         await _emailRepository.PostMailLogAsync(emailLog, cancellationToken);
     }
 
