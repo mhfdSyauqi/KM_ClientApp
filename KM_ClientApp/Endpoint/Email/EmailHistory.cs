@@ -6,39 +6,58 @@ using MimeKit;
 
 namespace KM_ClientApp.Endpoint.Email;
 
-public record EmailHistory(string LoginName,string SessionId, EmailHistoryRequest MailHistory) : INotification;
+public record EmailHistory(string LoginName, string SessionId, EmailHistoryRequest MailHistory) : INotification;
 
 public class EmailHistoryHandler : INotificationHandler<EmailHistory>
 {
-	private readonly IEmailRepository _emailRepository;
+    private readonly IEmailRepository _emailRepository;
 
-	public EmailHistoryHandler(IEmailRepository emailRepository)
-	{
-		_emailRepository = emailRepository;
-	}
+    public EmailHistoryHandler(IEmailRepository emailRepository)
+    {
+        _emailRepository = emailRepository;
+    }
 
-	public async Task Handle(EmailHistory notification, CancellationToken cancellationToken)
-	{
-		var emaiLTask = _emailRepository.GetMailConfigAsync(cancellationToken);
-		var recepientTask = _emailRepository.GetMailRecepientAsync(notification.LoginName, cancellationToken);
-        var userFeedbackTask = _emailRepository.GetUserFeedback(notification.SessionId, cancellationToken);
-		await Task.WhenAll(emaiLTask, recepientTask);
+    public async Task Handle(EmailHistory notification, CancellationToken cancellationToken)
+    {
+        var emailLog = new EmailLog();
 
-		var emailConfig = await emaiLTask;
-		var recepient = await recepientTask;
-        var userFeedback = await userFeedbackTask;
+        try
+        {
+            var emaiLTask = _emailRepository.GetMailConfigAsync(cancellationToken);
+            var recepientTask = _emailRepository.GetMailRecepientAsync(notification.LoginName, cancellationToken);
+            var userFeedbackTask = _emailRepository.GetUserFeedback(notification.SessionId, cancellationToken);
 
-		if (emailConfig != null && recepient != null && emailConfig.MAIL_HISTORY_STATUS)
-		{
-			var emailMessage = CreateEmailMessage(emailConfig, recepient, notification.MailHistory, userFeedback);
+            await Task.WhenAll(emaiLTask, recepientTask, userFeedbackTask);
 
-			using var client = new SmtpClient();
-			await client.ConnectAsync(emailConfig.MAIL_CONFIG_SERVER, emailConfig.MAIL_CONFIG_PORT, MailKit.Security.SecureSocketOptions.StartTls, cancellationToken);
-			await client.AuthenticateAsync(emailConfig.MAIL_CONFIG_USERNAME, emailConfig.MAIL_CONFIG_PASSWORD, cancellationToken);
-			await client.SendAsync(emailMessage, cancellationToken);
-			await client.DisconnectAsync(true, cancellationToken);
-		}
-	}
+            var emailConfig = await emaiLTask;
+            var recepient = await recepientTask;
+            var userFeedback = await userFeedbackTask;
+
+            if (emailConfig == null && recepient == null && !emailConfig!.MAIL_HISTORY_STATUS)
+            {
+                throw new Exception("Mail configuration invalid or disabled by system");
+            }
+
+            var emailMessage = CreateEmailMessage(emailConfig!, recepient!, notification.MailHistory, userFeedback!);
+
+            emailLog.To = recepient!.Email;
+            emailLog.Subject = emailMessage.Subject;
+            emailLog.Body = emailMessage.HtmlBody.ToString().Trim();
+
+            using var client = new SmtpClient();
+            await client.ConnectAsync(emailConfig!.MAIL_CONFIG_SERVER, emailConfig.MAIL_CONFIG_PORT, MailKit.Security.SecureSocketOptions.StartTls, cancellationToken);
+            await client.AuthenticateAsync(emailConfig.MAIL_CONFIG_USERNAME, emailConfig.MAIL_CONFIG_PASSWORD, cancellationToken);
+            await client.SendAsync(emailMessage, cancellationToken);
+            await client.DisconnectAsync(true, cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            emailLog.SendStatus = "Failed";
+            emailLog.ErrorMsg = ex.Message;
+        }
+
+        await _emailRepository.PostMailLogAsync(emailLog, cancellationToken);
+    }
 
     private static string GetStarRating(int rating)
     {
@@ -58,18 +77,18 @@ public class EmailHistoryHandler : INotificationHandler<EmailHistory>
     }
 
     private static MimeMessage CreateEmailMessage(EmailHistoryConfig emailConfig, EmailHistoryRecipient recipient, EmailHistoryRequest history, UserFeedback userFeedback)
-	{
-		var message = new MimeMessage();
-		var mailboxFrom = new MailboxAddress(emailConfig.MAIL_HISTORY_FROM, emailConfig.MAIL_CONFIG_USERNAME);
-		var mailboxTo = new MailboxAddress(recipient.Full_Name, recipient.Email);
+    {
+        var message = new MimeMessage();
+        var mailboxFrom = new MailboxAddress(emailConfig.MAIL_HISTORY_FROM, emailConfig.MAIL_CONFIG_USERNAME);
+        var mailboxTo = new MailboxAddress(recipient.Full_Name, recipient.Email);
 
-		message.From.Add(mailboxFrom);
-		message.To.Add(mailboxTo);
-		message.Subject = emailConfig.MAIL_HISTORY_SUBJECT;
+        message.From.Add(mailboxFrom);
+        message.To.Add(mailboxTo);
+        message.Subject = emailConfig.MAIL_HISTORY_SUBJECT;
 
         var headerEmail = string.Empty;
-		var bodyEmail = new BodyBuilder();
-		var bodyHistories = string.Empty;
+        var bodyEmail = new BodyBuilder();
+        var bodyHistories = string.Empty;
         var bodyFeedback = string.Empty;
 
 
@@ -94,24 +113,24 @@ public class EmailHistoryHandler : INotificationHandler<EmailHistory>
 
         <div role='separator' style='line-height: 10px'>&zwj;</div>";
 
-        
+
 
         foreach (var item in history.Histories)
-		{
-			var createAt = DateTime.Parse(item.Time);
+        {
+            var createAt = DateTime.Parse(item.Time);
 
-			if (item.Actor == "bot")
-			{
-				bodyHistories += $@"
+            if (item.Actor == "bot")
+            {
+                bodyHistories += $@"
                 <p style='margin: 0; overflow-wrap: break-word; font-weight: 600; line-height: 24px;color: #707070;'>{emailConfig.MAIL_HISTORY_FROM}, {createAt.ToString("HH:mm")} :</p>
                 <p style='overflow-wrap: break-word; text-indent: 20px; color:#888888;'>{item.Message}</p>
                 <div role='separator' style='line-height: 10px'>&zwj;</div>";
-				continue;
-			}
+                continue;
+            }
 
-			if (item.Actor == "content")
-			{
-				bodyHistories += $@"
+            if (item.Actor == "content")
+            {
+                bodyHistories += $@"
                 <p style='margin: 0; overflow-wrap: break-word; font-weight: 600; line-height: 24px;color: #707070;'>{emailConfig.MAIL_HISTORY_FROM}, {createAt.ToString("HH:mm")} :</p>
                 <p style='overflow-wrap: break-word; text-indent: 20px; color:#888888;'>{item.Message}</p>
                 <div role='separator' style='line-height: 10px'>&zwj;</div>
@@ -123,20 +142,20 @@ public class EmailHistoryHandler : INotificationHandler<EmailHistory>
                     </a>
                     <div role='separator' style='line-height: 14px'>&zwj;</div>
                 </div>";
-				continue;
-			}
+                continue;
+            }
 
-			if (item.Actor == "user")
-			{
-				bodyHistories += $@"
+            if (item.Actor == "user")
+            {
+                bodyHistories += $@"
                 <p style='margin: 0; overflow-wrap: break-word; font-weight: 600; line-height: 24px;color: #707070'>{recipient.Full_Name}, {createAt.ToString("HH:mm")} :</p>    
                 <p style='overflow-wrap: break-word; text-indent: 20px; color:#888888;'>{item.Message}</p>
                 <div role='separator' style='line-height: 10px'>&zwj;</div>";
-				continue;
-			}
-		}
+                continue;
+            }
+        }
 
-		bodyEmail.HtmlBody = $@"
+        bodyEmail.HtmlBody = $@"
         <!DOCTYPE html>
         <html lang='en' xmlns:v='urn:schemas-microsoft-com:vml'>
         <head>
@@ -226,7 +245,7 @@ public class EmailHistoryHandler : INotificationHandler<EmailHistory>
         </body>
         </html>";
 
-		message.Body = bodyEmail.ToMessageBody();
-		return message;
-	}
+        message.Body = bodyEmail.ToMessageBody();
+        return message;
+    }
 }

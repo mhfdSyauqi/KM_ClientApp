@@ -19,33 +19,40 @@ public class EmailHelpdeskHandler : INotificationHandler<EmailHelpdesk>
 
     public async Task Handle(EmailHelpdesk notification, CancellationToken cancellationToken)
     {
-        var emailHelpdesk = new EmailHelpdeskFilter()
+        var emailLog = new EmailLog();
+        try
         {
-            Session_Id = Guid.Parse(notification.Request.Session_Id),
-            Content = notification.Request.Message,
-            Send_By = notification.Request.Send_By
-        };
+            var emailTask = _emailRepository.GetEmailHelpdeskConfigAsync(cancellationToken);
+            var formatTask = _emailRepository.GetEmailHelpdeskFormat(notification.Request.Send_By, cancellationToken);
 
-        await _emailRepository.PostMailHelpdeskAsync(emailHelpdesk, cancellationToken);
+            await Task.WhenAll(formatTask, emailTask);
 
-        var emailTask = _emailRepository.GetEmailHelpdeskConfigAsync(cancellationToken);
-        var formatTask = _emailRepository.GetEmalHelpdeskFormat(notification.Request.Send_By, cancellationToken);
+            var emailConfig = await emailTask;
+            var emailFormat = await formatTask;
 
-        await Task.WhenAll(formatTask, emailTask);
+            if (emailConfig == null && emailFormat == null)
+            {
+                throw new Exception("Mail configuration invalid");
+            }
 
-        var emailConfig = await emailTask;
-        var emailFormat = await formatTask;
+            var emailMessage = CreateEmailMessage(emailConfig!, emailFormat!, notification.Request.Message);
 
-        if (emailConfig != null && emailFormat != null)
-        {
-            var emailMessage = CreateEmailMessage(emailConfig, emailFormat, notification.Request.Message);
+            emailLog.To = emailConfig!.MAIL_HELPDESK_TO;
+            emailLog.Subject = emailMessage.Subject;
+            emailLog.Body = emailMessage.HtmlBody.ToString().Trim();
 
             using var client = new SmtpClient();
-            await client.ConnectAsync(emailConfig.MAIL_CONFIG_SERVER, emailConfig.MAIL_CONFIG_PORT, MailKit.Security.SecureSocketOptions.StartTls, cancellationToken);
+            await client.ConnectAsync(emailConfig!.MAIL_CONFIG_SERVER, emailConfig.MAIL_CONFIG_PORT, MailKit.Security.SecureSocketOptions.StartTls, cancellationToken);
             await client.AuthenticateAsync(emailConfig.MAIL_CONFIG_USERNAME, emailConfig.MAIL_CONFIG_PASSWORD, cancellationToken);
             await client.SendAsync(emailMessage, cancellationToken);
             await client.DisconnectAsync(true, cancellationToken);
         }
+        catch (Exception ex)
+        {
+            emailLog.SendStatus = "Failed";
+            emailLog.ErrorMsg = ex.Message;
+        }
+        await _emailRepository.PostMailLogAsync(emailLog, cancellationToken);
     }
 
     private static MimeMessage CreateEmailMessage(EmailHelpdeskConfig emailConfig, EmailHelpdeskFormat format, string userMessage)

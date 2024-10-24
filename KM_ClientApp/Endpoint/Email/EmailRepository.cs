@@ -38,7 +38,7 @@ public class EmailRepository : IEmailRepository
         return result;
     }
 
-    public async Task<EmailHelpdeskFormat?> GetEmalHelpdeskFormat(string LoginName, CancellationToken cancellationToken)
+    public async Task<EmailHelpdeskFormat?> GetEmailHelpdeskFormat(string LoginName, CancellationToken cancellationToken)
     {
         using var connection = await _connection.CreateConnectionAsync();
 
@@ -129,6 +129,24 @@ public class EmailRepository : IEmailRepository
 
         return result;
     }
+
+    public async Task<int> PostMailLogAsync(EmailLog email, CancellationToken cancellationToken)
+    {
+        using var connection = await _connection.CreateConnectionAsync();
+
+        string storedProcedureName = "[dbo].[Add_Mail_Log]";
+
+        var command = new CommandDefinition(
+            storedProcedureName,
+            email,
+            commandType: System.Data.CommandType.StoredProcedure,
+            cancellationToken: cancellationToken
+        );
+
+        var result = await connection.ExecuteAsync(command);
+
+        return result;
+    }
 }
 
 public interface IEmailRepository
@@ -136,7 +154,9 @@ public interface IEmailRepository
     Task<EmailHistoryConfig?> GetMailConfigAsync(CancellationToken cancellationToken);
     Task<EmailHistoryRecipient?> GetMailRecepientAsync(string LoginName, CancellationToken cancellationToken);
     Task<EmailHelpdeskConfig?> GetEmailHelpdeskConfigAsync(CancellationToken cancellationToken);
-    Task<EmailHelpdeskFormat?> GetEmalHelpdeskFormat(string LoginName, CancellationToken cancellationToken);
+    Task<EmailHelpdeskFormat?> GetEmailHelpdeskFormat(string LoginName, CancellationToken cancellationToken);
     Task<int> PostMailHelpdeskAsync(EmailHelpdeskFilter email, CancellationToken cancellationToken);
     Task<UserFeedback?> GetUserFeedback(string sessionId, CancellationToken cancellationToken);
+    Task<int> PostMailLogAsync(EmailLog email, CancellationToken cancellationToken);
+
 }
